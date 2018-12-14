@@ -1,0 +1,29 @@
+td label {
+    white-space: nowrap;
+}
+html, body,
+.container-fluid,
+.right-container {
+    height: 100%;
+}
+
+.right-container {
+    position: relative;
+}
+
+.grid-container {
+    position: absolute;
+    top: 44px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.set,.nel{
+    color: #008ffc !important;
+}
+.nel{
+    padding-left: 12px;
+}
+.tips{
+    color: #969190;
+}

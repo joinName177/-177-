@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新增编辑扩展字段</title>
+    <link rel="stylesheet" href="/src/styles/base.css">
+    <link rel="stylesheet" href="/src/bower_components/bootstrap/3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="/src/bower_components/jquery-easyui-1.5.5.2/themes/material-teal/easyui.css">
+    <link rel="stylesheet" href="/src/styles/icon_extend.css">
+    <link rel="stylesheet" href="/src/styles/common.css">
+    <script type="text/javascript" src="/src/bower_components/require/require.min.js"></script>
+    <script type="text/javascript" src="/src/scripts/config/require.config.js"></script>
+    <script src="./newly_field.js"></script>
+    <style>
+        html,body{
+            height: 100%;
+        }
+        .icon-style{
+            vertical-align: middle;
+            font-size: 22px;
+            color: #1990fc;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<form id="form" class="ty-form" enctype="multipart/form-data">
+    <table class="frm">
+        <tr class="hideName">
+            <td><label>所属档案表:</label></td>
+            <td>
+                <input type="text" id="recordClassifyName"/>
+            </td>
+        </tr>
+        <tr class="hideTr">
+            <td><label><span class="spn">*</span>控件类型:</label></td>
+            <td>
+                <input type="text" name="controlTypes" id="controlTypes"/>
+            </td>
+        </tr>
+        <tr>
+            <td><label><span>*</span>字段名称:</label></td>
+            <td>
+                <input type="text" name="fieldName" id="fieldName"/>
+            </td>
+        </tr>
+        <tr class="hideTr">
+            <td><label><span class="spn">*</span>取值来源:</label></td>
+            <td>
+                <input type="hidden" name="dataSource" id="dataCode"/>
+                <input type="text" id="dataSource"/><i id="icon" class="icon iconfont icon-jianli icon-style"></i>
+            </td>
+        </tr>
+    </table>
+</form>
+</body>
+</html>

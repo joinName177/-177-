@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>权限设置</title>
+    <link rel="stylesheet" href="/src/styles/base.css">
+    <link rel="stylesheet" href="/src/bower_components/bootstrap/3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="/src/bower_components/jquery-easyui-1.5.5.2/themes/material-teal/easyui.css">
+    <link rel="stylesheet" href="/src/styles/icon_extend.css">
+    <link rel="stylesheet" href="/src/styles/common.css">
+    <script type="text/javascript" src="/src/bower_components/require/require.min.js"></script>
+    <script type="text/javascript" src="/src/scripts/config/require.config.js"></script>
+    <script src="./batch_set.js"></script>
+    <style>
+        html,body{
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <form id="mainForm" class="ty-form" enctype="multipart/form-data">
+        <table class="frm">
+            <tr class="hideName">
+                <td><label>字段名称:</label></td>
+                <td>
+                    <input type="text" id="fieldName"/>
+                </td>
+            </tr>
+            <tr>
+                <td><label><span>*</span>是否允许人工维护:</label></td>
+                <td>
+                    <input type="text" name="allowUpdate" id="allowUpdate"/>
+                </td>
+            </tr>
+            <tr class="hideTr">
+                <td><label><span>*</span>是否必填:</label></td>
+                <td>
+                    <input type="text" name="required" id="required"/>
+                </td>
+            </tr>
+            <tr class="hideTr">
+                <td><label><span>*</span>可维护人员:</label></td>
+                <td>
+                    <input type="text" name="maintainer" id="maintainer"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>

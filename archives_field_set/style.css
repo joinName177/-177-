@@ -1,0 +1,39 @@
+td label {
+    white-space: nowrap;
+}
+html, body,
+.container-fluid,
+.left-container,
+.right-container {
+    height: 100%;
+}
+
+.right-container {
+    position: relative;
+}
+
+.grid-container {
+    position: absolute;
+    top: 44px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.left-top-container {
+    height: 60%;
+}
+.set{
+    color: #008ffc !important;
+}
+.w{
+    width: 80px;
+}
+.ztree .searchNode {
+    color: #08bbf3 !important;
+    font-weight: 700;
+    text-decoration: underline !important;
+}
+.ztree .selectNode {
+    font-weight: 700;
+    color: 	#C9C9C9 !important;
+}

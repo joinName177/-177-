@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>档案表及字段设置</title>
+    <link rel="stylesheet" href="/src/styles/base.css">
+    <link rel="stylesheet" href="/src/bower_components/bootstrap/3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="/src/bower_components/jquery-easyui-1.5.5.2/themes/material-teal/easyui.css">
+    <link rel="stylesheet" href="/src/styles/common.css">
+    <link rel="stylesheet" href="/src/styles/icon_extend.css">
+    <link rel="stylesheet" href="./style.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="./archives_field_set.js"></script>
+</head>
+<body>
+    <div class="container-fluid container-full-xl">
+        <div class="left-container col-lg-2 col-md-2 col-sm-2">
+            <div class="left-top-container">
+                <div class="datagrid-toolbar">
+                    <table>
+                        <tr>
+                            <td>
+                                <input type="text" id="searchTree"/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="ztree" id="archivesTree"></div>
+            </div>
+        </div>
+        <div class="right-container bod-left-6 col-lg-10 col-md-10 col-sm-10">
+            <!--搜索工具条-->
+            <div class="datagrid-toolbar">
+                <form id="form" class="ty-toolbar">
+                    <table>
+                        <tr>
+                            <td><label>字段名称:</label></td>
+                            <td><input type="text" name="field_name" id="field_name"></td>
+                            <td><label>是否允许人工维护:</label></td>
+                            <td><input type="text" name="is_maintain" id="is_maintain" class="w"></td>
+                            <td><label>是否允许必填:</label></td>
+                            <td><input type="text" name="is_fill" id="is_fill" class="w"></td>
+                            <td>
+                                <button data-role="event" id="search" type="button" class="btn btn-default btn-sm hasPermission">
+                                    <i class="iconfont icon-sousuo4"></i>搜索
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div class="grid-container">
+                <table id="archivesTable"></table>
+            </div>
+        </div>
+    </div>
+    <!--按钮工具条-->
+    <div id="archives_toolbar" class="datagrid-toolbar" style="display: none;">
+        <table class="grid-toolbar">
+            <tr>
+                <td>
+                    <button data-role="event" id="batchSet"  type="button" class="btn btn-default btn-sm hasPermission">
+                        <i class="iconfont icon-shezhi1"></i>批量设置权限
+                    </button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

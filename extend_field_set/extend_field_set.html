@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>扩展字段设置</title>
+    <link rel="stylesheet" href="/src/styles/base.css">
+    <link rel="stylesheet" href="/src/bower_components/bootstrap/3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="/src/bower_components/jquery-easyui-1.5.5.2/themes/material-teal/easyui.css">
+    <link rel="stylesheet" href="/src/styles/common.css">
+    <link rel="stylesheet" href="/src/styles/icon_extend.css">
+    <link rel="stylesheet" href="./style.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="./extend_field_set.js"></script>
+</head>
+<body>
+<div class="container-fluid container-full-xl">
+    <div class="right-container col-lg-12 col-md-12 col-sm-12">
+        <div class="datagrid-toolbar">
+            <table>
+                <tr>
+                    <td style="padding-left:15px !important;">
+                        <input type="text" name="fieldName" id="fieldName">
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="grid-container">
+            <table id="fieldTable"></table>
+        </div>
+    </div>
+</div>
+
+<div id="filedToolbar" class="datagrid-toolbar" style="display: none;">
+    <table class="grid-toolbar">
+        <tr>
+            <td>
+                <button data-role="event" id="add"  type="button" class="btn btn-default btn-sm hasPermission">
+                    <i class="iconfont icon-add"></i>新增扩展字段
+                </button>
+                <span class="tips">
+                    <span style="color: #f04134;">【说明】</span>：仅支持向基础信息表中添加<b style="font-size: 16px;color: #f04134;">10</b>个可使用的扩展字段!
+                </span>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>
