@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>入职建档详情</title>
+    <link rel="stylesheet" href="/src/tywp.min.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="entry_filing_detail.js"></script>
+    <style>
+        html,body{
+            height: 100%;
+        }
+        #tyTable tr{
+            height: 35px !important;
+        }
+        #tyTable th{
+            border: 1px solid #f5f5f5;
+            padding:4px;
+            text-align: right;
+            width: 10%;
+        }
+        #tyTable td{
+            border: 1px solid #f5f5f5;
+            height:27px;
+            width:25%;
+            overflow: hidden;
+            padding-right: 10px;
+        }
+        #tyTable td:nth-child(2n+1){
+            font-weight: bold;
+            width: 20%;
+        }
+        .sect>div{
+            padding: 2px;
+            margin-left: 10px;
+        }
+        .sect>div>span{
+            padding-left: 10px;
+        }
+        .tyStyle{
+            background: #ffffff;
+        }
+        #tyTable input,.tyStyle td{
+            padding-left: 8px;
+        }
+        .tit{
+            height: 25px;
+            display: block;
+            margin: 5px 21px 5px 12px;
+            line-height: 25px;
+        }
+    </style>
+</head>
+<body>
+<form id="mainForm" method="post" enctype="multipart/form-data" style="width: 100%;">
+    <table id="tyTable" style="width: 100%;">
+        <tr>
+            <td colspan="4" style="padding-left: 5px;">
+                <button class="btn btn-default btn-sm" type="button" onclick="flowChart()" style="width: 90px;">
+                    <i class="icon iconfont icon-file-tree"></i>流程图</button>
+            </td>
+        </tr>
+        <tr>
+            <th><label>姓名:</label></th>
+            <td>
+                <input type="text" id="userName" name="userName"/>
+            </td>
+            <th><label>性别:</label></th>
+            <td>
+                <input type="text" id="sexName" name="sexName"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>身份证号:</label></th>
+            <td>
+                <input type="text" id="identityCard" name="identityCard"/>
+            </td>
+            <th><label>教工类型:</label></th>
+            <td>
+                <input type="text" id="staffTypeName" name="staffTypeName"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>入职日期:</label></th>
+            <td>
+                <input type="text" id="dateOnBoard" name="dateOnBoard"/>
+            </td>
+            <th><label>状态:</label></th>
+            <td>
+                <input type="text" id="statusName" name="statusName"/>
+            </td>
+        </tr>
+
+        <tr class="hideTrPeriod">
+            <th><label>试用期:</label></th>
+            <td>
+                <input type="text" name="probationName" id="probationName"/>
+            </td>
+        </tr>
+
+        <tr>
+            <th><label>入职部门:</label></th>
+            <td>
+                <input type="text" id="entryDepartment"/>
+            </td>
+            <th><label>入职岗位:</label></th>
+            <td>
+                <input type="text" id="entryPost"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>职务名称:</label></th>
+            <td>
+                <input type="text" id="dutyName"/>
+            </td>
+            <th><label>是否兼职岗位:</label></th>
+            <td>
+                <input type="text" id="parttimeJob" />
+            </td>
+        </tr>
+    </table>
+    <div>
+        <b class="tit">审批历史</b>
+        <iframe src="" id="approvalHistory" class="history" style="width: 100%;height:345px;border: 1px solid #f5f5f5;"></iframe>
+    </div>
+</form>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>入职建档</title>
+    <link rel="stylesheet" href="/src/tywp.min.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="entry_filing.js"></script>
+    <style>
+        html,body{
+            height: 100%;
+        }
+        .icons{
+            font-size: 20px !important;
+            vertical-align: -webkit-baseline-middle;
+            color: #5da3e8;
+            cursor: pointer;
+        }
+        .tyIcon{
+            color: red !important;padding-left: 2px;
+        }
+        .tip{
+            background: rgba(230, 247, 255, 1);
+            border: 1px solid;
+            border-color: rgba(186, 231, 255, 1);
+            border-radius: 4px;padding: 5px;color: #312f2f;
+        }
+    </style>
+</head>
+<body style="overflow: auto !important;">
+    <form id="mainForm" class="ty-form" enctype="multipart/form-data">
+        <input type="hidden" name="staffType" id="staffCode"/><!--教工类型-->
+        <input type="hidden" name="sex" id="sexCode"/><!--性别-->
+        <input type="hidden" name="status" id="statusCode"/><!--状态-->
+        <input type="hidden" name="probation" id="probationCode"/><!--试用期-->
+        <table class="frm">
+            <div style="padding:2px;">
+                <div class="tip">
+                    <i class="icon iconfont icon-xiangqing" style="color: #1990fc;"></i>
+                    提交后，员工则可凭借身份证号登录并进行入职登记，初始密码为身份证后六位（字母大写）。
+                </div>
+            </div>
+            <tr>
+                <td><label><span class="spn">*</span>姓名:</label></td>
+                <td>
+                    <input type="text" id="userName" name="userName"/>
+                </td>
+                <td><label><span class="spn">*</span>性别:</label></td>
+                <td>
+                    <input type="text" id="sex"/>
+                </td>
+            </tr>
+            <tr>
+                <td><label><span class="spn">*</span>身份证号:</label></td>
+                <td>
+                    <input type="text" id="identityCard" name="identityCard"/>
+                </td>
+                <td><label><span class="spn">*</span>教工类型:</label></td>
+                <td>
+                    <input type="text" id="staffType"/>
+                </td>
+            </tr>
+            <tr>
+                <td><label><span class="spn">*</span>入职日期:</label></td>
+                <td>
+                    <input type="text" id="dateOnBoard" name="dateOnBoard"/>
+                </td>
+                <td><label><span class="spn">*</span>状态:</label></td>
+                <td>
+                    <input type="text" id="status"/>
+                </td>
+            </tr>
+
+            <tr class="hideTrPeriod">
+                <td><label><span class="spn">*</span>试用期:</label></td>
+                <td>
+                    <input type="text" id="probation"/>
+                </td>
+            </tr>
+
+            <tr>
+                <td><label><span class="spn">*</span>入职部门:</label></td>
+                <td>
+                    <span onclick="chooseDepartment(this)"><input type="text" id="entryDepartment"/></span>
+                </td>
+                <td><label><span class="spn">*</span>入职岗位:</label></td>
+                <td>
+                    <input type="text" id="entryPost" prompt="请先选择部门后选择岗位！"/>
+                </td>
+            </tr>
+            <tr>
+                <td><label>职务名称:</label></td>
+                <td>
+                    <input type="text" id="jobName"/>
+                </td>
+                <td><label><span class="spn">*</span>是否兼职岗位:</label></td>
+                <td>
+                    <input type="text" id="isPluralityPost" name="parttimeJob"/>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>详情</title>
+    <link rel="stylesheet" href="/src/tywp.min.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="./detail.js"></script>
+    <style>
+        html,body{
+            height: 100%;
+        }
+        #tyTable tr{
+            height: 35px !important;
+        }
+        #tyTable th{
+            border: 1px solid #f5f5f5;
+            padding:4px;
+            text-align: right;
+            width: 19%;
+        }
+        #tyTable td{
+            border: 1px solid #f5f5f5;
+            height:27px;
+            width:25%;
+            overflow: hidden;
+            padding-right: 10px;
+        }
+        #tyTable td:nth-child(2n+1){
+            font-weight: bold;
+            width: 20%;
+        }
+        .sect>div{
+            padding: 2px;
+            margin-left: 10px;
+        }
+        .sect>div>span{
+            padding-left: 10px;
+        }
+        .tyStyle{
+            background: #ffffff;
+        }
+        #tyTable input,.tyStyle td{
+            padding-left: 8px;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            line-height: 30px;
+        }
+        .file-item img{
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+        .file-item a {
+            width: 150px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .file-item span {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<form id="mainForm" method="post" enctype="multipart/form-data" style="width: 100%;">
+    <table id="tyTable" style="width: 100%;">
+        <tr>
+            <td colspan="4">
+                <button class="btn btn-default btn-sm" type="button" onclick="showDetail()">
+                    <i class="icon iconfont icon-chakansousuodingdan"></i>查看员工详情</button>
+                <button class="btn btn-default btn-sm" type="button" onclick="flowChart()">
+                    <i class="icon iconfont icon-file-tree"></i>流程图</button>
+            </td>
+        </tr>
+        <tr>
+            <th><label>姓名：</label></th>
+            <td>
+                <input type="text" id="userName" name="userName" disabled="disabled"/>
+            </td>
+            <th><label>工号：</label></th>
+            <td>
+                <input type="text" id="workNo" name="workNo" disabled="disabled"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>性别：</label></th>
+            <td>
+                <input type="text" id="sexName" name="sexName" disabled="disabled"/>
+            </td>
+            <th><label>离退类别：</label></th>
+            <td>
+                <input type="text" id="retireTypeName" name="retireTypeName" disabled="disabled"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>离退起始日期：</label></th>
+            <td>
+                <input type="text" id="retireDate" name="retireDate" disabled="disabled"/>
+            </td>
+            <th><label>离退后享受级别：</label></th>
+            <td>
+                <input type="text" id="retireLevelName" name="retireLevelName" disabled="disabled"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>离退休费支付单位：</label></th>
+            <td>
+                <input type="text" id="payDepartment" name="retirePaymentDepartment" disabled="disabled"/>
+            </td>
+            <th><label>离退后管理单位：</label></th>
+            <td>
+                <input type="text" id="retireManagent" name="retireManagent" disabled="disabled"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>异地安置地点：</label></th>
+            <td colspan="4">
+                <input type="text" id="placeOfResettlement" name="placeOfResettlement" disabled="disabled"/>
+            </td>
+        </tr>
+        <tr>
+            <th><label>附件：</label></th>
+            <td colspan="4" style="height: 91px;overflow-y:scroll;padding: 5px 0 5px 8px;">
+                <div id="fileBox" style="height: 100%;"></div>
+            </td>
+        </tr>
+    </table>
+    <div>
+        <b style="display: block;height: 35px;line-height: 35px;padding-left: 10px;">审批历史</b>
+        <iframe src="" id="history" class="history" style="width: 100%;height:345px;border: 1px solid #f5f5f5;"></iframe>
+    </div>
+</form>
+
+</body>
+</html>

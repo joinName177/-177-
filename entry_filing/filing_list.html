@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>入职建档</title>
+    <link rel="stylesheet" href="/src/tywp.min.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="filing_list.js"></script>
+    <style>
+        td label {
+            white-space: nowrap;
+        }
+        html, body,
+        .container-fluid,
+        .right-container {
+            height: 100%;
+        }
+
+        .right-container {
+            position: relative;
+        }
+
+        .grid-container {
+            position: absolute;
+            top: 44px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .p{
+            position: relative;
+        }
+        .fa{
+            position: absolute;
+            top: 3px;
+            left: -15px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid container-full-xl">
+    <div class="right-container col-lg-12 col-md-12 col-sm-12">
+        <div class="datagrid-toolbar">
+            <form class="ty-toolbar">
+                <table>
+                    <tr>
+                        <td>
+                            <label>员工：</label>
+                            <input type="text" name="fieldName" id="fieldName"/>
+                        </td>
+                        <td>
+                            <label>教工类型：</label>
+                            <input type="text" name="staffType" id="staffType" style="width: 130px;"/>
+                        </td>
+                        <td>
+                            <button data-role="event" id="search" type="button" class="btn btn-default btn-sm hasPermission">
+                                <i class="iconfont icon-sousuo4"></i>搜索
+                            </button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+        <div class="grid-container">
+            <table id="filingList"></table>
+        </div>
+    </div>
+</div>
+
+<div id="filedToolbar" class="datagrid-toolbar" style="display: none;">
+    <table class="grid-toolbar">
+        <tr>
+            <td>
+                <button data-role="event" id="create"  type="button" class="btn btn-default btn-sm hasPermission">
+                    <i class="iconfont icon-add"></i>入职建档
+                </button>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

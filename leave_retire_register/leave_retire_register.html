@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>离退休登记</title>
+    <link rel="stylesheet" href="/src/tywp.min.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="./leave_retire_register.js"></script>
+    <style>
+        html, body,
+        .container-fluid,
+        .left-container,
+        .right-container {
+            height: 100%;
+        }
+
+        .right-container {
+            position: relative;
+        }
+
+        .grid-container {
+            position: absolute;
+            top: 44px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        .p{
+            position: relative;
+        }
+        .fa{
+            position: absolute;
+            top: 3px;
+            left: -15px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid container-full-xl" id="container">
+        <!--<div class="left-container col-lg-2 col-md-2 col-sm-2">
+            <div class="left-top-container">
+                <div class="ztree" id="organizeTree"></div>
+            </div>
+        </div>-->
+        <div class="right-container col-lg-12 col-md-12 col-sm-12">
+            <!--搜索工具条-->
+            <div class="datagrid-toolbar">
+                <form class="ty-toolbar">
+                    <table>
+                        <tr>
+                            <td>
+                                <label>姓名：</label>
+                                <input type="text" id="userName" name="userName" prompt="请输入姓名"/>
+                            </td>
+                            <td>
+                                <label>工号：</label>
+                                <input type="text" id="userCode" name="userCode" prompt="请输入工号"/>
+                            </td>
+                            <td>
+                                <button data-role="event" id="search" type="button" class="btn btn-default btn-sm hasPermission">
+                                    <i class="iconfont icon-sousuo4"></i>搜索
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+            <div class="grid-container">
+                <table id="retireGrid"></table>
+            </div>
+        </div>
+    </div>
+    <div id="toolbar" class="datagrid-toolbar" style="display: none;">
+        <table class="grid-toolbar">
+            <tr>
+                <td>
+                    <button data-role="event" id="create"  type="button" class="btn btn-default btn-sm hasPermission">
+                        <i class="iconfont icon-add"></i>新增离退休
+                    </button>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

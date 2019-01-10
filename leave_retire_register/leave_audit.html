@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>离退休登记审核</title>
+    <link rel="stylesheet" href="/src/tywp.min.css">
+</head>
+<style>
+    html, body, .container-fluid {
+        height: 100%;
+    }
+    .baseinfo td {
+        padding-right: 80px;
+    }
+    .file-item {
+        display: flex;
+        align-items: center;
+        line-height: 30px;
+    }
+    .file-item img{
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+    }
+    .file-item a {
+        width: 150px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .file-item span {
+        margin-left: 5px;
+        cursor: pointer;
+    }
+</style>
+<body>
+<div class="container-fluid container-full-xl" id="container">
+    <div id="toolBar" class="datagrid-toolbar" style="display: block;">
+        <table class="grid-toolbar">
+            <tr>
+                <td>
+                    <a id="agree" href="javascript:void(0);" class="easyui-linkbutton"
+                       data-options="plain:true,iconCls:'icon-weibiaoti14'">通过</a>
+                    <a id="disagree" href="javascript:void(0);" class="easyui-linkbutton"
+                       data-options="plain:true,iconCls:'icon-returnfanhuizuo'">驳回</a>
+                    <a id="history" href="javascript:void(0);" class="easyui-linkbutton"
+                       data-options="plain:true,iconCls:'icon-zhizhang4'">审批历史</a>
+                    <a id="flowChart" href="javascript:void(0);" class="easyui-linkbutton"
+                       data-options="plain:true,iconCls:'icon-lianjie'">流程图</a>
+                    <a id="detail" href="javascript:void(0);" class="easyui-linkbutton"
+                       data-options="plain:true,iconCls:'icon-lianjie'">查看员工详情</a>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="row " style="height: 100%;padding-top: 5px">
+        <div class="col-md-12 col-s2-10 col-lg-12" style="height: 100%">
+            <form id="mainForm" class="ty-form">
+                <table class="frm">
+                    <tr>
+                        <td><label>员工：</label></td>
+                        <td>
+                            <input type="text" id="userName" name="userName"/>
+                        </td>
+                        <td><label>性别：</label></td>
+                        <td>
+                            <input type="text" id="sexName" name="userName"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label>离退类别：</label></td>
+                        <td>
+                            <input type="text" id="retireType" name="retireTypeName"/>
+                        </td>
+                        <td><label>离退起始日期：</label></td>
+                        <td>
+                            <input type="text" id="retireDate" name="retireDate"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label>离退后享受级别：</label></td>
+                        <td>
+                            <input type="text" id="retireLevel" name="retireLevelName"/>
+                        </td>
+                        <td><label>离退休费支付单位：</label></td>
+                        <td>
+                            <input type="text" id="department" name="retirePaymentDepartment"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label>离退后管理单位：</label></td>
+                        <td>
+                            <input type="text" id="manAgent" name="retireManagent"/>
+                        </td>
+                        <td><label>异地安置地点：</label></td>
+                        <td>
+                            <input type="text" id="distinctPlace" name="placeOfResettlement"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label>申请资料：</label></td>
+                        <td>
+                            <div id="fileBox"></div>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+
+        </div>
+    </div>
+</div>
+<!--数据列表工具条-->
+</body>
+<script src="/src/bower_components/require/require.min.js"></script>
+<script src="/src/scripts/config/require.config.js"></script>
+<script src="./leave_audit.js"></script>
+</html>

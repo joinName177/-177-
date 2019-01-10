@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>新增离退休</title>
+    <link rel="stylesheet" href="/src/tywp.min.css">
+    <script src="/src/bower_components/require/require.min.js"></script>
+    <script src="/src/scripts/config/require.config.js"></script>
+    <script src="./leave_retire_add.js"></script>
+    <style>
+        html,body{
+            height: 100%;
+        }
+        .icons{
+            font-size: 20px !important;
+            vertical-align: -webkit-baseline-middle;
+            color: #2196F3;
+            cursor: pointer;
+        }
+        .file-item {
+            display: flex;
+            align-items: center;
+            line-height: 30px;
+        }
+        .file-item img{
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+        .file-item a {
+            width: 150px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+        .file-item span {
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        .delete {
+            font-size: 16px;
+            display: inline-block;
+        }
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<form id="mainForm" class="ty-form">
+    <input type="hidden" name="baseId" id="baseId"/>
+    <table class="frm">
+        <tr>
+            <td><label><span class="spn">*</span>员工：</label></td>
+            <td>
+                <span id="personIcon" style="cursor: pointer;"><input type="text" id="userName"/></span>
+            </td>
+            <td><label>性别：</label></td>
+            <td>
+                <input type="text" id="sex"/>
+            </td>
+        </tr>
+        <tr>
+            <td><label><span class="spn">*</span>离退类别：</label></td>
+            <td>
+                <input type="text" id="retireType" name="retireType"/>
+            </td>
+            <td><label><span class="spn">*</span>离退起始日期：</label></td>
+            <td>
+                <input type="text" id="retireDate" name="retireDate"/>
+            </td>
+        </tr>
+        <tr>
+            <td><label>离退后享受级别：</label></td>
+            <td>
+                <input type="text" id="retireLevel" name="retireLevel"/>
+            </td>
+            <td><label>异地安置地点：</label></td>
+            <td>
+                <input type="text" id="placeOfResettlement" name="placeOfResettlement"/>
+            </td>
+        </tr>
+        <tr>
+            <td><label>离退后管理单位：</label></td>
+            <td>
+                <input type="text" id="retireManagent" name="retireManagent"/>
+            </td>
+            <td><label>离退休费支付单位：</label></td>
+            <td>
+                <input type="text" id="payDepartment" name="retirePaymentDepartment"/>
+            </td>
+        </tr>
+    </table>
+</form>
+<table style="margin-top: 10px;">
+    <tr>
+        <td style="width: 147px;text-align: right;position: relative;"><label style="position: absolute;top: 0;right: 0;"><span style="color: red;">*</span>申请资料：</label></td>
+        <td style="padding-left: 15px;">
+            <input id="tempFile" name="file" type="file"/>
+            <div id="fileList" style="width: 204px;height: 90px;overflow-y: scroll;overflow: auto;"></div>
+        </td>
+    </tr>
+</table>
+</body>
+</html>
