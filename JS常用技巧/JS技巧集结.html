@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>JS技巧集结案例</title>
+    <link rel="stylesheet" href="./font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="./index.css">
+    <script src="./jquery-2.1.4.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <section>
+            <div class="wrap-header">
+                <span>【消息模板】配置</span>
+                <i class="fa fa-angle-double-down fa-2x switch" data-isopen="0"></i>
+            </div>
+            <div class="wrap-content"></div>
+        </section>
+        <section>
+            <div class="wrap-header">
+                <span>标题</span>
+                <i class="fa fa-angle-double-down fa-2x switch" data-isopen="0"></i>
+            </div>
+            <div class="wrap-content"></div>
+        </section>
+        <section>
+            <div class="wrap-header">
+                <span>标题</span>
+                <i class="fa fa-angle-double-down fa-2x switch" data-isopen="0"></i>
+            </div>
+            <div class="wrap-content"></div>
+        </section>
+    </div>
+</body>
+<script>
+    // 
+    const module = {
+        bindEvent: () => {
+            $(".container section").off().on('click', '.switch', function () {
+                if ($(this).attr('data-isopen') == 0){
+                    $(this).attr('data-isopen',1)
+                }
+                    // fa-angle-double-up
+                    $(this).parent().siblings('div').slideToggle(200)
+            })
+        }
+    }
+
+    $(function () {
+        module.bindEvent()
+    })
+</script>
+
+</html>
