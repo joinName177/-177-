@@ -16,42 +16,126 @@
         <section>
             <div class="wrap-header">
                 <span>【消息模板】配置</span>
-                <i class="fa fa-angle-double-down fa-2x switch" data-isopen="0"></i>
+                <i class="fa fa-angle-down fa-2x switch" data-isopen="1"></i>
+            </div>
+            <div class="wrap-content">
+                <div class="info">
+                    <div contenteditable="true" id="infoTemplate"></div>
+                    <ul class="info-list col" unselectable="on" onmousedown="return false;">
+                        <li class="info-active" data-id="1">【模板】语文</li>
+                        <li data-id="2">【模板】数学</li>
+                        <li data-id="3">【模板】化学</li>
+                        <li data-id="4">【模板】生物</li>
+                        <li data-id="5">【模板】政治</li>
+                        <li data-id="6">【模板】历史</li>
+                        <li data-id="7">【模板】地理</li>
+                    </ul>
+                    <i class="fa fa-plus plus-btn col"></i>
+                </div>
+            </div>
+        </section>
+        <section>
+            <div class="wrap-header">
+                <span>标题</span>
+                <i class="fa fa-angle-down fa-2x switch" data-isopen="1"></i>
             </div>
             <div class="wrap-content"></div>
         </section>
         <section>
             <div class="wrap-header">
                 <span>标题</span>
-                <i class="fa fa-angle-double-down fa-2x switch" data-isopen="0"></i>
+                <i class="fa fa-angle-down fa-2x switch" data-isopen="1"></i>
             </div>
             <div class="wrap-content"></div>
         </section>
-        <section>
-            <div class="wrap-header">
-                <span>标题</span>
-                <i class="fa fa-angle-double-down fa-2x switch" data-isopen="0"></i>
-            </div>
-            <div class="wrap-content"></div>
-        </section>
+        <div class="more">
+            <i class="fa fa-angle-double-down fa-3x"></i>
+        </div>
     </div>
 </body>
 <script>
     // 
     const module = {
+        init: () => {
+            $($(".container").find('section')[0]).find('.wrap-content').show()
+            module.bindEvent()
+        },
+        createData: (len) => {
+            let htm = ''
+            for (var i = 0; i < len; i++) {
+                htm += `<section>
+                    <div class="wrap-header">
+                        <span>标题_${i}</span>
+                        <i class="fa fa-angle-down fa-2x switch" data-isopen="1"></i>
+                    </div>
+                    <div class="wrap-content"></div>
+                </section>`
+            }
+            return htm
+        },
         bindEvent: () => {
+            //模块开关事件
             $(".container section").off().on('click', '.switch', function () {
-                if ($(this).attr('data-isopen') == 0){
-                    $(this).attr('data-isopen',1)
+                if ($(this).attr('data-isopen') == 0) {
+                    $(this).attr('data-isopen', 1)
+                    $(this).addClass('fa-angle-down')
+                    $(this).removeClass('fa-angle-up')
+                } else {
+                    $(this).attr('data-isopen', 0)
+                    $(this).removeClass('fa-angle-down')
+                    $(this).addClass('fa-angle-up')
                 }
-                    // fa-angle-double-up
-                    $(this).parent().siblings('div').slideToggle(200)
+                $(this).parent().siblings('div').slideToggle(200)
             })
+            //创建更多模块
+            $(".container .more").off().on('click', function () {
+                $(this).before(module.createData(30))
+                module.bindEvent()
+            })
+
+            $(".plus-btn").off().on('click', function (e) {
+                e.stopPropagation()
+                $(".info-list").slideDown(200)
+                //消息模板特殊处理
+                let constituency = document.querySelector("#infoTemplate");//获得当前选区
+                let _focus = $("#infoTemplate").is(":focus");
+                if (!_focus) {
+                    if (window.getSelection) {
+                        constituency.focus()
+                        var range = window.getSelection(); //创建range
+                        range.selectAllChildren(constituency); //range 选择obj下所有子内容
+                        range.collapseToEnd(); //光标移至最后
+                    } else if (document.selection) {
+                        var range = document.selection.createRange(); //创建选择对象
+                        range.moveToElementText(constituency); //range定位到obj
+                        range.collapse(false); //光标移至最后
+                        range.select();
+                    }
+                }
+
+            })
+
+            $(".info-list").on('click','li',function(){
+                let _val = $(this).text()
+                e.preventDefault()
+                let _val = $(e.target).text()
+                let _id = $(e.target).attr('data-uuid')
+                let _width = autoInpWidth(_val) + 3
+                var selVal = `<input style="width:${_width}px" class="selList" data-uuid="${_id}"  value="${_val}" disabled/>`
+                insertChange('insertHTML', selVal)
+            })
+            //点击空白处关闭下拉
+            $(document).click(function (e) {
+                var _con = $(".col"); // 设置目标区域
+                if (!_con.is(e.target) && _con.has(e.target).length === 0) {
+                    $(".info-list").slideUp(200)
+                }
+            });
         }
     }
 
     $(function () {
-        module.bindEvent()
+        module.init()
     })
 </script>
 
