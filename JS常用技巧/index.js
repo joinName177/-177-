@@ -8,7 +8,10 @@
 
 const TempSkill = function () {
 
-    /**模板消息核心方法START */
+
+    //知识点一:
+    /*************************************模板消息核心方法START************************************************/
+    //插入DOM节点
     let insertHtmlToRange = (domNode, inputTarget) => {
         if (domNode == null || inputTarget == null) {
             return;
@@ -67,18 +70,18 @@ const TempSkill = function () {
             textRange.select();
         }
     }
-
+    //写入内容
     let insertChange = (a, b) => {
         b ?
             document.execCommand(a, false, b) :
             document.execCommand(a, true, null)
     }
-
+    //计算宽度
     let autoInpWidth = (val) => {
         var txtLen = val.length + 1
         return txtLen * 14
     }
-
+    //选择模板
     let choiceTemp = (e) => {
         e.stopPropagation()
         $(".info-list").slideDown(200)
@@ -105,8 +108,7 @@ const TempSkill = function () {
             }
         }
     }
-
-    /**模板消息核心方法END */
+    /*************************************模板消息核心方法END************************************************/
 
     let createData = (len) => {
         let htm = ''
