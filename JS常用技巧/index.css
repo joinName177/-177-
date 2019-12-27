@@ -216,8 +216,114 @@
 }
 
 /***==========================*/
-.effect{
-    width: 200px;
-    height: 200px;
-    background: #CCFFFF;
+.looadbar{
+    width:0px;
+    height: 3px;
+    background: #2980b9;
+    opacity:0.25
+}
+.option-box{
+    display: flex;
+    margin-top: 20px;
+}
+.option-box > span{
+    display: block;
+    width: 80px;
+    height: 32px;
+    text-align: center;
+    line-height: 32px;
+    cursor: pointer;
+    border: 1px solid #555555;
+    box-shadow: 0 0 2px #555555;
+    color:#555555;
+    font-weight: bold;
+    font-size: 12px;
+    margin-right: 5px;
+    cursor: pointer;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+}
+.option-box > span:hover{
+    color:white;
+    background: #555555;
+}
+
+.s-step{
+    width: 800px;
+    margin: 20px 0 0 50px;
+}
+.s-step>section{
+    width: 100%;
+    position: relative;
+    display: flex;
+    padding-bottom: 20px;
+}
+.s-modular::before,
+.s-modular::after{
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    background: #66cc9963;
+    position: absolute;
+    top: 15px;
+    left: -30px;
+    border-radius: 50%;
+    z-index: 9;
+}
+.s-modular::after{
+   width: 10px;
+   height: 10px;
+   z-index: 10;
+   background: #66CC99;
+   left: -25px;
+   top: 20px;
+}
+.s-m-info{
+    display: flex;
+    flex-direction: column;
+    padding-left: 12px;
+}
+.s-m-type{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #66CC99;
+    color: white;
+    font-weight: bold;
+    line-height: 50px;
+    text-align: center;
+    cursor: pointer;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+}
+.s-m-type:hover{
+    background: white;
+    color: #66CC99;
+    box-shadow: 0 0 8px #66CC99;
+}
+.s-m-title{
+    margin: 5px 0 5px 0;
+    cursor: pointer;
+}
+.s-m-title:hover{
+    text-decoration: underline;
+}
+.s-m-remark{
+    max-width: 700px;
+    color: burlywood;
+    user-select: none;
+}
+
+.s-step>section>i{
+    position: absolute;
+    height: 100%;
+    width: 1px;
+    position: absolute;
+    left: -21px;
+    top: 30px;
+    border-left: 1px dashed #66CC99;
+}
+.s-step>section:last-child i{
+    border-left: 0;
 }

@@ -234,10 +234,65 @@ const TempSkill = function () {
             }
         });
     }
+    //动画深入浅出
+    let animationFn = () => {
+        $(".option-box").off().on('click', 'span', function () {
+            if ($(this).hasClass('move')) {
+                $(".looadbar").animate({
+                    opacity: 1,
+                    background: '#2980b9',
+                    width: "100%"
+                }, {
+                    duration: 1000,
+                    complete: function () {
+                        $(this).css({
+                            width: 0,
+                            opacity: 0.25,
+                        })
+                    }
+                })
+            } else if ($(this).hasClass('step')) {
+                let strHtml = ``
+                for (var i = 0; i < 15; i++) {
+                    let content = '【详细说明】园区集团机关党支部自5月份批复设立以来，严格对照党章党规要求，压实责任推动全员学习，不断强化政治理论学习，扎实推进学习教育常态化制度化，努力把学习贯彻习近平系列讲话精神和十九大精神转化为推动集团持续健康发展的强大动力'
+                    if(i == 13){
+                        content = `【详细说明】Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of..., while others prefer...
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
+                        例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
+                        基于个人经历、个性类型和情感关注的不同，我们发现有人喜欢生活在小城镇，而另外一些人则更喜欢大城市。`
+                    }
+                    strHtml += ` <section class="s-modular"><i></i>
+                    <span class="s-m-type">类型</span>
+                    <div class="s-m-info">
+                        <span class="s-m-title">【版权${i}】保留所有权利</span>
+                        <span class="s-m-remark">${content}</span>
+                    </div>
+                </section>`
+                }
+                $(".s-step").html(strHtml).slideDown(200)
+            }
+        })
+    }
+
     return {
         init: () => {
             renderTempData()
             bindEvent()
+            animationFn()
         },
     }
 }()
