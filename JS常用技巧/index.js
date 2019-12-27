@@ -106,6 +106,31 @@ const TempSkill = function () {
             }
         }
     }
+    //消息模板手动输入的文字转换为标签
+    let queryDom = (dom) => {
+        if (dom.nodeType == 1) {
+            for (var i = 0; i < dom.childNodes.length; i++) {
+                var _nowDom = dom.childNodes[i];
+                if (_nowDom.nodeType == 1) {
+                    queryDom(_nowDom)
+                } else if (_nowDom.nodeType == 3) {
+                    if (_nowDom.parentNode.tagName === "INPUT") return
+                    var _replaceNode = document.createElement('span')
+                    _replaceNode.className = 'operation'
+                    _replaceNode.innerText = _nowDom.nodeValue;
+                    _nowDom.parentNode.replaceChild(_replaceNode, _nowDom);
+                }
+
+            }
+        }
+    }
+    let transformStr = (str) => {
+        var _dom = document.createElement('div');
+        _dom.innerHTML = str;
+        queryDom(_dom);
+        return _dom.innerHTML
+    }
+
     /*************************************模板消息核心方法END************************************************/
 
     let createData = (len) => {
@@ -114,13 +139,38 @@ const TempSkill = function () {
             htm += `<section>
                     <div class="wrap-header">
                         <span>标题_${i}</span>
-                        <i class="fa fa-angle-down fa-2x switch" data-isopen="1"></i>
+                        <i class="fa fa-angle-down fa-2x switch" data-isopen="0"></i>
                     </div>
                     <div class="wrap-content"></div>
                 </section>`
         }
         return htm
     }
+
+    //模拟渲染模板控件
+    let renderTempData = () => {
+        let arr = []
+        for (var i = 0; i <= 20; i++) {
+            arr.push({
+                id: i,
+                type: i < 18 ? 'element' : 'text',
+                content: i < 18 ? `【模板】模板${i}` : `这是文字${i}`
+            })
+        }
+        let domStr = ''
+        for (var i = 0; i < arr.length; i++) {
+            let _val = arr[i].content
+            if (arr[i].type == 'element') {
+                let _width = autoInpWidth(_val) + 3
+                domStr += `<input style="width:${_width}px" class="selList" data-id="${arr[i].id}"  value="${_val}" disabled/>`
+            } else {
+                domStr += `<span class="operation">${_val}</span>`
+            }
+        }
+
+        $("#infoTemplate").html(domStr)
+    }
+
     let bindEvent = () => {
         $('.news-template-content').keypress(function (event) {
             if (event.keyCode == 13 || event.charCode == 13) {
@@ -130,16 +180,31 @@ const TempSkill = function () {
         })
         //模块开关事件
         $(".container section").off().on('click', '.switch', function () {
+            let $section = $(this).parents('section')
             if ($(this).attr('data-isopen') == 0) {
                 $(this).attr('data-isopen', 1)
-                $(this).addClass('fa-angle-down')
-                $(this).removeClass('fa-angle-up')
-            } else {
-                $(this).attr('data-isopen', 0)
+                $($section).attr('isOpen', 'start')
                 $(this).removeClass('fa-angle-down')
                 $(this).addClass('fa-angle-up')
+                $(this).parent().siblings('div').slideDown(200)
+            } else {
+                $(this).attr('data-isopen', 0)
+                $($section).attr('isOpen', 'close')
+                $(this).addClass('fa-angle-down')
+                $(this).removeClass('fa-angle-up')
+                $(this).parent().siblings('div').slideUp(200)
             }
-            $(this).parent().siblings('div').slideToggle(200)
+
+            let $Siblings = $section.siblings('section')
+
+            $Siblings.each((index, dom) => {
+                if ($(dom).attr('isOpen') == 'start') {
+                    $(dom).attr('isOpen', 'close')
+                    $(dom).find('.wrap-content').slideUp(200)
+                    $(dom).find('.switch').attr('data-isopen', 0)
+                    $(dom).find('.switch').addClass('fa-angle-down').removeClass('fa-angle-up')
+                }
+            })
         })
         //创建更多模块
         $(".container .more").off().on('click', function () {
@@ -148,7 +213,10 @@ const TempSkill = function () {
         })
 
         $(".plus-btn").off().on('click', (e) => choiceTemp(e))
-
+        $(".tra-btn").off().on('click', () => {
+            let msgHtml = $("#infoTemplate").html()
+            $("#infoTemplate").html(transformStr(msgHtml))
+        })
         $(".info-list").on('click', 'li', function (e) {
             e.preventDefault()
             let _val = $(this).text()
@@ -168,6 +236,7 @@ const TempSkill = function () {
     }
     return {
         init: () => {
+            renderTempData()
             bindEvent()
         },
     }
