@@ -87,7 +87,7 @@ const TempSkill = function () {
         let _focus = $("#infoTemplate").is(":focus");
         if (!_focus) {
             if (window.getSelection) {
-             
+
                 constituency.focus()
                 //创建range
                 var range = window.getSelection();
@@ -183,6 +183,7 @@ const TempSkill = function () {
         })
         //模块开关事件
         $(".container section").off().on('click', '.wrap-header', function () {
+            $(this).addClass('wrap-header-active').parent().siblings().find('.wrap-header').removeClass('wrap-header-active')
             let $section = $(this).parents('section')
             let dom = $(this).find('i')
             if ($(dom).attr('data-isopen') == 0) {
@@ -235,6 +236,101 @@ const TempSkill = function () {
                 $(".info-list").slideUp(200)
             }
         });
+
+    }
+    //promise async await 实践
+    let promiseInit = () => {
+        // Math.floor(Math.random()*10+1);
+        let promise1 = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(1)
+                // reject(1)
+            }, 2000)
+        })
+        let promise2 = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(2)
+            }, 1000)
+        })
+        let promise3 = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve(3)
+            }, 3000)
+        })
+        $(".wrap-box").on('click', '.commonBtn', function () {
+            $(this).addClass('commonBtn-active').siblings('span.commonBtn').removeClass('commonBtn-active')
+            let id = $(this).attr('id')
+            //promise串行加载....
+            if (id == 'strandBtn') {
+                $(".promiseBox").find('img').attr('src','')
+                $(".promiseBox").find('p').empty()
+                let promise = new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        let data = {
+                            headImg: 'lb.jpg',
+                            describe: '1、刘备(161-223)，221年至223年在位。蜀汉照烈皇帝，字玄德，涿郡(今河北省涿县)人，汉景帝之子中山靖王刘胜的后代。少年时孤独贫困，与母亲贩鞋子、织草席为生，后与关羽、张飞于桃园结义为异姓兄弟。剿除黄巾军有功，任安喜县尉。经常寄人篱下，先后投靠过公孙瓒、陶谦、曹操、袁绍、刘表等。建安十二年(207)，徐庶荐举诸葛亮，刘备三顾茅庐请出诸葛亮为军师，率军攻占了荆州、益州、汉中。于公元221年正式称帝，定都成都，国号汉，年号章武，史称“蜀汉”。在替关羽、张飞报仇时，大举进攻吴国，被东吴陆逊用火攻打败，不久病死于白帝城，享年63岁。'
+                        }
+                        $(".cont-1 img").attr('src', `../JS常用技巧/image/sg/${data.headImg}`)
+                        $(".cont-1 p").text(data.describe)
+                        resolve(data)
+                    }, 300)
+                })
+                promise.then((res) => {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            let data = {
+                                headImg: 'gy.jpg',
+                                describe: '2、关羽(?-220)，刘备的义弟，五虎大将排名第一位。字云长，本字长生，河东解县(今山西省临猗西南)人。因战乱而逃亡至涿郡。其后与张飞一起追随刘备。曾在汜水关前斩华雄，虎牢关前战吕布而闻名天下。官渡之战前被俘，被曹操拜为偏军，封汉寿亭侯，为曹杀了袁绍名将颜良、文丑。后千里走单骑，骑坐赤兔马，提一口青龙偃月刀，过五关斩六将，终于回到刘备身边。后攻曹仁于樊城，水淹七军，收降曹操大将于禁，杀庞德，让华佗刮骨疗毒，威名远扬。'
+                            }
+                            $(".cont-2 img").attr('src', `../JS常用技巧/image/sg/${data.headImg}`)
+                            $(".cont-2 p").text(data.describe)
+                            resolve(data)
+                        }, 200)
+                    })
+                }).then((res) => {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            let data = {
+                                headImg: 'zf.jpg',
+                                describe: '3、张飞(?-221)，刘备义弟，五虎大将中第二位。字翼德，涿郡(今河北省涿县)人。少时即与关羽共事刘备。曾在虎牢关与关羽、刘备一起迎战吕布。长坂坡桥头上一声吼，吓退曹操百万军。葭萌关夜战马超，一支丈八蛇矛勇冠三军。刘备入川以后拜本骑将军，封西乡侯。公元221年为替二哥关羽报仇，同刘备起兵攻伐东吴。临行前，因鞭挞士卒被部将范疆、张达刺杀，死时只有55岁。'
+                            }
+                            $(".cont-3 img").attr('src', `../JS常用技巧/image/sg/${data.headImg}`)
+                            $(".cont-3 p").text(data.describe)
+                            resolve(data)
+                        }, 100)
+                    })
+
+                })
+                //Promise.all并行加载....
+            } else if (id == 'parallelBtn') {
+                Promise.all([promise1, promise2, promise3]).then((res) => {
+                    //全部成功打印
+                    console.log(res)
+                }, err => {
+                    //一处异常打印
+                    console.log(err)
+                })
+            } else if (id == 'parallelBtn2') {
+                //竞速模式
+                Promise.race([promise1, promise2, promise3]).then((res) => {
+                    console.log(res)
+                }, err => {
+                    console.log('error')
+                    console.log(err)
+                })
+            } else if (id == 'asyncAwait') {
+                //例子
+                //描述方法B依赖方法A的返回结果
+                let a = () => {
+                    setTimeout(() => {
+                        return {
+                            name: "张三"
+                        }
+                    }, 3000)
+                }
+            }
+        })
+
     }
     //动画深入浅出
     let animationFn = () => {
@@ -292,7 +388,7 @@ const TempSkill = function () {
 
     let showImgList = () => {
         let hStr = ``
-        for (var i = 0; i < 20; i++) {
+        for (var i = 0; i < 1; i++) {
             hStr += ` <div class="img-item">
             <div class="img-title">iPhone 11</div>
         </div>`
@@ -306,6 +402,7 @@ const TempSkill = function () {
             bindEvent()
             animationFn()
             showImgList()
+            promiseInit()
             $(".c-combox-ipt").off().on('click', function () {
                 $(".c-combox-ul").show()
                 $(".c-combox-ul").animate({
