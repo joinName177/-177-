@@ -14,14 +14,24 @@
 }
 .wrap-header{
     height: 45px;
-    /* background: #66CC99; */
-    background: #a8adab;
+    background: #353535;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 10px 0 8px;
-    color: white;
+    color: #ffffffab;
     border-bottom: 1px solid rgba(231,231,233,1);
+    background-image: linear-gradient(to right, #f9f9f9 -2%, #353535 56%);
+}
+.wrap-header:hover{
+    background-image: linear-gradient(to right, #353535 -2%, #f9f9f9 56%);
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+    transition: all ease .4s;
+    color: white;
+}
+.wrap-header:hover i{
+    color: #353535 !important;
 }
 .wrap-header span{
     font-weight: bold;
@@ -248,6 +258,10 @@
     background: #555555;
 }
 
+.option-box-active{
+
+}
+
 .s-step{
     width: 800px;
     margin: 20px 0 0 50px;
@@ -296,11 +310,17 @@
     cursor: pointer;
     -webkit-transition-duration: 0.4s; /* Safari */
     transition-duration: 0.4s;
+
+    box-shadow: 0px 0px 0px 0px #66CC99;
+    transform: scale(1); 
+    transition: box-shadow 0.6s, transform 0.5s; 
 }
 .s-m-type:hover{
     background: white;
     color: #66CC99;
-    box-shadow: 0 0 8px #66CC99;
+    /* box-shadow: 0 0 8px #66CC99; */
+    box-shadow: 0px 0px 20px 5px #66CC99;
+	transition: box-shadow 0.5s;
 }
 .s-m-title{
     margin: 5px 0 5px 0;
@@ -326,4 +346,76 @@
 }
 .s-step>section:last-child i{
     border-left: 0;
+}
+
+
+/**下拉组件CSS**/
+.c-combox-ipt{
+    width: 400px;
+    height: 34px;
+    /* background: #e1e7ea; */
+    color: #2b2d2c;
+    border: 1px solid #e1e7ea;
+    line-height: 34px;
+    padding-left: 5px;
+    position: relative;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.c-combox-ul{
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 133px;
+    display: none;
+    opacity: 0.25;
+    background: blanchedalmond;
+}
+
+.c-combox-ul li{
+    height: 34px;
+    background: #848484;
+    color: white;
+    padding-left: 5px;
+    margin-bottom: 1px;
+    -webkit-transition-duration: 0.4s; /* Safari */
+    transition-duration: 0.4s;
+}
+
+
+.combox-active,.c-combox-ul li:hover{
+    background: blanchedalmond !important;
+    color: #848484 !important;
+}
+
+
+/***图片系列*/
+.img-box{
+    display: flex;
+    flex-wrap: wrap;
+}
+.img-item{
+    width: 149px;
+    height: 182px;
+    background: url(../JS常用技巧/image/iphone.png) no-repeat;
+    background-size: 100% 100%;
+    margin: 0 20px 20px 0;
+    box-shadow: 0px 0px 5px 3px #353535;
+    position: relative;
+    cursor: pointer;
+}
+.img-title{
+    width: 100%;
+    height: 42px;
+    background: #cec9c97d;
+    color: white;
+    font-weight: bold;
+    line-height: 42px;
+    padding-left: 5px;
+    position: absolute;
+    bottom: 0;
+}
+.img-item:hover .img-title{
+    color: #16a085;
 }

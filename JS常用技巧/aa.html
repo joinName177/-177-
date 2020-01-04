@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8" />
+<title>title</title>
+<meta name="generator" content="generator">
+<meta name="author" content="author">
+<meta name="description" content="description" />
+<meta name="keywords" content="keywords" />
+</head>
+<body>
+
+  <div contenteditable="true" style="width: 676px; height: 296px; display: block;" id="content"></div>
+
+  <div>
+    <input type="text" id="text"/>
+    <input type="button" name="确定" id="button"/>
+  </div>
+
+  <script type="text/javascript">
+    
+    var doc = document;
+    var _ua = navigator.userAgent.toLowerCase(), _IE = _ua.indexOf('msie') > -1 && _ua.indexOf('opera') == -1;
+
+    var _focus = new _getFocus();
+
+    var _editarea = getID('content'),_text = getID('text');
+    
+    getID('button').onclick=function(){
+        _editarea.focus();//移动焦点
+        _focus.get();//复位焦点
+        _rangeExec(document, _getRange(window), _text.value,'inserthtml');
+    }
+    
+    //失去焦点
+    _editarea.onblur = function(e){
+        _focus.set(window);
+    }
+    
+    function getID(id) {
+        return doc.getElementById(id);
+    }
+
+    //锁定光标执行方法
+    function _getFocus() {
+        var or,rng,range;
+        //绑回当前方法
+        function getRange() {
+            addRange(range,or);//把结构提重新填入到Range
+            rng = null;
+            //range= null;
+            or=null;
+        }
+        //焦点锁定
+        function addRange(sel, r) {
+            if(!_IE)
+            {
+                sel.removeAllRanges();//清空或者放弃你在网页中选取的文字
+                sel.addRange(r);
+            }else{
+                
+            }
+        }
+        //设置绑定焦点
+        function setRange(doc) {
+            range = _getRange(window);
+            console.log(range);
+            or = _IE ? range : range.getRangeAt(0); 
+            rng = document.createRange(); 
+            addRange(range,rng); 
+        }
+        //存入焦点
+        this.set = function(doc) {
+            setRange(doc);
+        };
+        //复位焦点
+        this.get = function(){
+            getRange();
+        };
+    }
+
+    //获取range对象
+    function _getRange(win) {
+        var range = null;
+        if (_IE) {
+            range = win.document.selection.createRange();
+        }
+        else {
+            range = win.getSelection ? win.getSelection() : win.document.selection;
+        }
+        return range;
+    }
+
+    //执行Exec
+    function _rangeExec(doc, range, arge, style) {
+        try {
+           _IE ? range.execCommand(style, false, arge) : doc.execCommand(style, false, arge);
+        } catch (e) { }
+        return true;
+    }
+
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,25 @@
+*{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.c-combox-ipt{
+    width: 400px;
+    height: 34px;
+    background: black;
+    color: white;
+    line-height: 34px;
+    padding-left: 5px;
+    position: relative;
+}
+.c-combox-ul{
+    position: relative;
+    width: 100%;
+}
+
+.c-combox-ul li{
+    height: 34px;
+    background: black;
+    color: white;
+}

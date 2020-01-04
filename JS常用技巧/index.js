@@ -45,7 +45,6 @@ const TempSkill = function () {
             if (document.implementation && document.implementation.hasFeature && document.implementation.hasFeature("Range", "2.0")) {
                 var tempRange = document.createRange();
                 var chatmessage = inputTarget;
-                var position = rang.endOffset;
                 tempRange.selectNodeContents(chatmessage);
                 tempRange.setStart(rang.endContainer, rang.endOffset);
                 tempRange.setEnd(rang.endContainer, rang.endOffset);
@@ -88,6 +87,7 @@ const TempSkill = function () {
         let _focus = $("#infoTemplate").is(":focus");
         if (!_focus) {
             if (window.getSelection) {
+             
                 constituency.focus()
                 //创建range
                 var range = window.getSelection();
@@ -106,6 +106,9 @@ const TempSkill = function () {
             }
         }
     }
+
+
+
     //消息模板手动输入的文字转换为标签
     let queryDom = (dom) => {
         if (dom.nodeType == 1) {
@@ -150,11 +153,11 @@ const TempSkill = function () {
     //模拟渲染模板控件
     let renderTempData = () => {
         let arr = []
-        for (var i = 0; i <= 20; i++) {
+        for (var i = 0; i <= 60; i++) {
             arr.push({
                 id: i,
-                type: i < 18 ? 'element' : 'text',
-                content: i < 18 ? `【模板】模板${i}` : `这是文字${i}`
+                type: i < 60 ? 'element' : 'text',
+                content: i < 60 ? `【模板】模板${i}` : `这是文字${i}`
             })
         }
         let domStr = ''
@@ -179,36 +182,35 @@ const TempSkill = function () {
             }
         })
         //模块开关事件
-        $(".container section").off().on('click', '.switch', function () {
+        $(".container section").off().on('click', '.wrap-header', function () {
             let $section = $(this).parents('section')
-            if ($(this).attr('data-isopen') == 0) {
-                $(this).attr('data-isopen', 1)
+            let dom = $(this).find('i')
+            if ($(dom).attr('data-isopen') == 0) {
+                $(dom).attr('data-isopen', 1)
                 $($section).attr('isOpen', 'start')
-                $(this).removeClass('fa-angle-down')
-                $(this).addClass('fa-angle-up')
-                $(this).parent().siblings('div').slideDown(200)
+                $(dom).removeClass('fa-angle-down')
+                $(dom).addClass('fa-angle-up')
+                $(this).siblings('div').slideDown(200)
             } else {
-                $(this).attr('data-isopen', 0)
+                $(dom).attr('data-isopen', 0)
                 $($section).attr('isOpen', 'close')
-                $(this).addClass('fa-angle-down')
-                $(this).removeClass('fa-angle-up')
-                $(this).parent().siblings('div').slideUp(200)
+                $(dom).addClass('fa-angle-down')
+                $(dom).removeClass('fa-angle-up')
+                $(this).siblings('div').slideUp(200)
             }
-
             let $Siblings = $section.siblings('section')
-
-            $Siblings.each((index, dom) => {
-                if ($(dom).attr('isOpen') == 'start') {
-                    $(dom).attr('isOpen', 'close')
-                    $(dom).find('.wrap-content').slideUp(200)
-                    $(dom).find('.switch').attr('data-isopen', 0)
-                    $(dom).find('.switch').addClass('fa-angle-down').removeClass('fa-angle-up')
+            $Siblings.each((index, $dom) => {
+                if ($($dom).attr('isOpen') == 'start') {
+                    $($dom).attr('isOpen', 'close')
+                    $($dom).find('.wrap-content').slideUp(200)
+                    $($dom).find('.switch').attr('data-isopen', 0)
+                    $($dom).find('.switch').addClass('fa-angle-down').removeClass('fa-angle-up')
                 }
             })
         })
         //创建更多模块
         $(".container .more").off().on('click', function () {
-            $(this).before(createData(30))
+            $(this).before(createData(1))
             bindEvent()
         })
 
@@ -255,7 +257,7 @@ const TempSkill = function () {
                 let strHtml = ``
                 for (var i = 0; i < 15; i++) {
                     let content = '【详细说明】园区集团机关党支部自5月份批复设立以来，严格对照党章党规要求，压实责任推动全员学习，不断强化政治理论学习，扎实推进学习教育常态化制度化，努力把学习贯彻习近平系列讲话精神和十九大精神转化为推动集团持续健康发展的强大动力'
-                    if(i == 13){
+                    if (i == 13) {
                         content = `【详细说明】Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of..., while others prefer...
                         基于个人经历、个性类型和情感关注的不同，我们发现有人持……的观点，而另外一些人则更喜欢……
                         例句：Depending on personal experience, personal type and emotion concern, we find that some people hold the idea of living in the small town, while others prefer the big city.
@@ -288,11 +290,43 @@ const TempSkill = function () {
         })
     }
 
+    let showImgList = () => {
+        let hStr = ``
+        for (var i = 0; i < 20; i++) {
+            hStr += ` <div class="img-item">
+            <div class="img-title">iPhone 11</div>
+        </div>`
+        }
+        $(".img-box").append(hStr)
+    }
+
     return {
         init: () => {
             renderTempData()
             bindEvent()
             animationFn()
+            showImgList()
+            $(".c-combox-ipt").off().on('click', function () {
+                $(".c-combox-ul").show()
+                $(".c-combox-ul").animate({
+                    opacity: 1,
+                    top: 33
+                }, {
+                    duration: 160
+                })
+            })
+            $(document).bind("click", function (e) {
+                var con_one = $(".c-combox-ipt");// 设置目标区域
+                if (!con_one.is(e.target) && con_one.has(e.target).length === 0) {
+                    // $(".c-combox-ul").slideUp(200);//需要隐藏的元素
+                    $(".c-combox-ul").animate({
+                        opacity: 0,
+                        top: 133
+                    }, {
+                        duration: 160
+                    })
+                }
+            });
         },
     }
 }()
