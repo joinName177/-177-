@@ -1,0 +1,25 @@
+react 
+一.创建项目 (https://www.jianshu.com/p/38e7fa41a4d5)
+步骤:官方
+1.npm install create-react-app -g
+2.create-react-app react-demo  (react-demo项目名)
+3.cd react-demo 
+4.npm install
+5.npm start     //运行
+
+二.配置路由
+npm install --save react-router-dom    //这样就可以使用react router 了
+
+三.添加less配置 
+(使用create-react-app 创建的项目默认不支持less，以下增加less配置的步骤)
+npminstall--save-dev less-loaderless
+
+修改webpack配置
+修改 webpack.config.dev.js 和 webpack.config-prod.js 配置文件
+1. exclude
+/\.css$/ 改为 /\.(css|less)$/
+
+2. test
+test: /\.css$/ 改为 /\.(css|less)$/
+test: /\.css$/ 的 use 数组配置增加 less-loader
+

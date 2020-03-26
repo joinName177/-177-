@@ -237,6 +237,16 @@ const TempSkill = function () {
             }
         });
 
+        //选项卡
+        $(".header-nav-ul").off().on('click', 'li', function () {
+            let index = $(this).index()
+            $(this).addClass('s_active').siblings().removeClass('s_active')
+            // $(".select_content_box").find('div').eq(index).show().siblings().hide()
+            $(".select_content_box").animate({
+                left: - 917 * index
+            }, 200)
+        })
+
     }
     //promise async await 实践
     let promiseInit = () => {
@@ -262,7 +272,7 @@ const TempSkill = function () {
             let id = $(this).attr('id')
             //promise串行加载....
             if (id == 'strandBtn') {
-                $(".promiseBox").find('img').attr('src','')
+                $(".promiseBox").find('img').attr('src', '')
                 $(".promiseBox").find('p').empty()
                 let promise = new Promise((resolve, reject) => {
                     setTimeout(() => {
@@ -319,15 +329,37 @@ const TempSkill = function () {
                     console.log(err)
                 })
             } else if (id == 'asyncAwait') {
-                //例子
-                //描述方法B依赖方法A的返回结果
-                let a = () => {
-                    setTimeout(() => {
-                        return {
-                            name: "张三"
-                        }
-                    }, 3000)
+                //例子《描述方法B依赖方法A的返回结果》
+                async function a() {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            resolve({
+                                name: "张三"
+                            })
+                        }, 1000)
+                    })
+
                 }
+
+                async function b() {
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            resolve({
+                                age: 18
+                            })
+                        }, 3000)
+                    })
+                }
+
+                async function fn() {
+                    console.log('1 await 前面')
+                    let result1 = await b();
+                    console.log(result1)
+                    let result2 = await a();
+                    console.log(result2)
+                    console.log('3 await 后面')
+                }
+                fn()
             }
         })
 
@@ -386,14 +418,28 @@ const TempSkill = function () {
         })
     }
 
-    let showImgList = () => {
-        let hStr = ``
-        for (var i = 0; i < 1; i++) {
-            hStr += ` <div class="img-item">
-            <div class="img-title">iPhone 11</div>
-        </div>`
-        }
-        $(".img-box").append(hStr)
+    let initDownEvent = () => {
+        $(".c-combox-ipt").off().on('click', function () {
+            $(".c-combox-ul").show()
+            $(".c-combox-ul").animate({
+                opacity: 1,
+                top: 33
+            }, {
+                duration: 160
+            })
+        })
+        $(document).bind("click", function (e) {
+            var con_one = $(".c-combox-ipt");// 设置目标区域
+            if (!con_one.is(e.target) && con_one.has(e.target).length === 0) {
+                // $(".c-combox-ul").slideUp(200);//需要隐藏的元素
+                $(".c-combox-ul").animate({
+                    opacity: 0,
+                    top: 133
+                }, {
+                    duration: 160
+                })
+            }
+        });
     }
 
     return {
@@ -401,29 +447,8 @@ const TempSkill = function () {
             renderTempData()
             bindEvent()
             animationFn()
-            showImgList()
             promiseInit()
-            $(".c-combox-ipt").off().on('click', function () {
-                $(".c-combox-ul").show()
-                $(".c-combox-ul").animate({
-                    opacity: 1,
-                    top: 33
-                }, {
-                    duration: 160
-                })
-            })
-            $(document).bind("click", function (e) {
-                var con_one = $(".c-combox-ipt");// 设置目标区域
-                if (!con_one.is(e.target) && con_one.has(e.target).length === 0) {
-                    // $(".c-combox-ul").slideUp(200);//需要隐藏的元素
-                    $(".c-combox-ul").animate({
-                        opacity: 0,
-                        top: 133
-                    }, {
-                        duration: 160
-                    })
-                }
-            });
-        },
+            initDownEvent()
+        }
     }
 }()

@@ -358,6 +358,7 @@
     border: 1px solid #e1e7ea;
     line-height: 34px;
     padding-left: 5px;
+    float:right;
     position: relative;
     cursor: pointer;
     border-radius: 4px;
@@ -398,12 +399,18 @@
 .img-item{
     width: 149px;
     height: 182px;
-    background: url(../JS常用技巧/image/iphone.png) no-repeat;
-    background-size: 100% 100%;
+    background: url(../JS常用技巧/image/img/img-1.webp) no-repeat;
+    background-size: 100% 100% !important;
     margin: 0 20px 20px 0;
     box-shadow: 0px 0px 5px 3px #353535;
     position: relative;
     cursor: pointer;
+}
+.img-item:nth-child(2){
+    background: url(../JS常用技巧/image/img/img-2.webp)100% 100% no-repeat;
+}
+.img-item:nth-child(3){
+    background: url(../JS常用技巧/image/img/img-3.webp)100% 100% no-repeat;
 }
 .img-title{
     width: 100%;
@@ -477,4 +484,55 @@
 .odiv p{
     padding-left: 6px;
     /* color: #8a8989; */
+}
+
+/**选项卡**/
+.header-nav{
+    /* box-shadow: 0 0 15px -1px; */
+    border: 1px solid #efecea;
+    border-top: 0;
+    background: white;
+    overflow: hidden;
+}
+.header-nav ul{
+    display: flex;
+}
+.header-nav ul li{
+    height: 32px;
+    width: 153px;
+    border-right: 1px solid #efecea;
+    border-bottom: 1px solid #efecea;
+    border-top: 1px solid #efecea;
+    text-align: center;
+    line-height: 32px;
+    cursor: pointer;
+    user-select: none;
+}
+.header-nav ul li:last-child{
+    border-right: 0;
+}
+.s_active{
+    border-top: 2px solid #16a085 !important;
+    border-bottom:none !important;
+    color: #16a085 !important;
+}
+.select_content_box{
+    width: 5502px;
+    height: 245px;
+    display: flex;
+    position: absolute;
+    left: 0;
+}
+.select_content_box div{
+    padding: 10px;
+    width: 917px;
+    height: 245px;
+    /* display: none; */
+}
+.select_content_box div:first-child{
+    display: block;
+}
+.select_box_father{
+    position: relative;
+    height: 245px;
 }
