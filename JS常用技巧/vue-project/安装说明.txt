@@ -1,0 +1,7 @@
+1：安装cnpm 淘宝镜像======npm install -g cnpm --registry=https://registry.npm.taobao.org
+2：安装vue-cli脚手架构建工具==npm install -g vue-cli
+3:  安装vue =============vue init webpack firstApp
+
+
+//==========CMD命令============
+md   名称   //创建文件夹
