@@ -1,113 +1,58 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
+     <div>
+      <span v-for="(value, key) in language">{{value}}</span>
+    </div>
     <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
+      <li v-for="item in country">{{item}}</li>
     </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+   <div>
+     <button @click="changeLanguage">按钮</button>
+   </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  data () {
+  name: "HelloWorld",
+  data() {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      country: ["中国", "美国", "法国", "德国", "韩国", "意大利", "西班牙"],
+      language: {
+        zh: "中文",
+        ch: "英文"
+      }
+    };
+  },
+  methods: {
+    changeLanguage(){
+      this.language.zh = '中国-中文'
     }
   }
-}
+};
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
+<!--STYLE-->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
 ul {
-  list-style-type: none;
+  width: 300px;
+  margin: 0;
   padding: 0;
 }
 li {
-  display: inline-block;
-  margin: 0 10px;
+  list-style: none;
+  height: 28px;
+  border: 1px solid #d8d8d8;
+  border-bottom: none;
+  padding-left: 5px;
+  line-height: 28px;
+  cursor: pointer;
 }
-a {
-  color: #42b983;
+li:last-child {
+  border-bottom: 1px solid #d8d8d8;
+}
+li:hover {
+  background: #d8d8d8;
+  color: azure;
 }
 </style>
