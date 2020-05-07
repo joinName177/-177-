@@ -340,7 +340,6 @@ const TempSkill = function () {
                     })
 
                 }
-
                 async function b() {
                     return new Promise((resolve, reject) => {
                         setTimeout(() => {
@@ -441,7 +440,11 @@ const TempSkill = function () {
             }
         });
     }
-
+    
+    //检测类型
+    let isArray = (arr) => {
+        return Object.prototype.toString.call(arr) === "[object Array]";
+    }
     return {
         init: () => {
             renderTempData()

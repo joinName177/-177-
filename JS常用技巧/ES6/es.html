@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ES6</title>
+    <script src="../jquery-2.1.4.js"></script>
+    <script src="../开发常用JS封装/commonly.js"></script>
+    <style>
+        button {
+            border: none;
+            width: 120px;
+            height: 26px;
+            color: white;
+            background: #d8d5d5;
+            box-shadow: 0 0 6px 0px black;
+            cursor: pointer;
+            outline: none;
+            margin-bottom: 6px;
+        }
+
+        .load {
+            background: #FF9800 !important;
+        }
+
+        .compty {
+            background: #43cc48 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header-content">
+        <button onclick="btnEvent()">模拟加载</button>
+        <button onclick="asyncDefalt()">同步加载</button>
+        <button onclick="asyncPromise()">Promise异步加载</button>
+        <button onclick="asyncPromiseA()">Promise简化写法</button>
+        <button onclick="asyncPromiseAll()">Promise.all</button>
+    </div>
+    <div class="center-content">
+        <ul class="center-list">
+            <li data-id="1">Store and Forward is 1 </li>
+            <li data-id="2">Store and Forward is 2 </li>
+            <li data-id="3">Store and Forward is 3 </li>
+            <li data-id="4">Store and Forward is 4 </li>
+            <li data-id="5">Store and Forward is 5 </li>
+            <li data-id="6">Store and Forward is 6 </li>
+            <li data-id="7">Store and Forward is 7 </li>
+        </ul>
+    </div>
+</body>
+<script>
+    //1
+    function getData(id) {
+        $('button').addClass('load').text('加载中...')
+        return new Promise((reslove, reject) => {
+            setTimeout(() => {
+                reslove([{ name: "加载完成...." }])
+            }, 3000)
+        })
+    }
+
+    function btnEvent() {
+        $('button').removeClass('compty')
+        getData(16).then((data) => {
+            console.log(data)
+            $('button').removeClass('load').addClass('compty').text(data[0].name)
+        })
+    }
+    //arguments对象不是数组，而是一个类似数组的对象。所以为了使用数组的方法，必须使用Array.prototype.slice.call先将其转为数组
+    // arguments变量的写法
+    // function sortNumbers() {
+    //     return Array.prototype.slice.call(arguments).sort(); //繁琐
+    // }
+    // rest参数的写法
+    const sortNumbers = (...numbers) => numbers.sort();//简洁  rest参数时一个真正的数组  包含所有数组的方法
+    console.log(sortNumbers(7, 9, 5, 3, 8, 1, 2))
+    //...rest参数 
+    //!注意，rest 参数之后不能再有其他参数（即只能是最后一个参数），否则会报错
+    function pushExamp(array, ...items) {
+        console.log(arguments)
+        items.forEach((item) => {
+            array.push(item)
+            console.log(item)
+        })
+        console.log(array)
+    }
+    pushExamp([], 2, 3, 4, 5, 6, 7, 8)
+
+
+
+    //变量的解构赋值
+    let a = 1;
+    let b = 2;
+    [a, b] = [b, a]
+    console.log('a的原始值1_现在的值：' + a)
+    console.log('b的原始值2_现在的值：' + b)
+
+
+    //Promise  promise是一个对象，对象和函数的区别就是对象可以保存状态，函数不可以（闭包除外）
+
+    //模拟同步加载
+    function asyncDefalt() {
+        console.log('开始请求时间' + new Date().toLocaleTimeString())
+        setTimeout(() => {
+            asyncDefalt2(1)
+            console.log("数据同步请求第一步")
+        }, 1000)
+    }
+    function asyncDefalt2(data) {
+        setTimeout(() => {
+            asyncDefalt3(data)
+            console.log("数据同步请求第二步")
+        }, 1000)
+    }
+    function asyncDefalt3(data) {
+        setTimeout(() => {
+            console.log("数据同步请求第三步")
+            console.log("加载完成!" + data)
+            console.log('拿到数据时间' + new Date().toLocaleTimeString())
+        }, 1000)
+    }
+
+    //Promise加载
+    function asyncPromise() {
+        console.log('开始请求时间' + new Date().toLocaleTimeString())
+        let promise = new Promise((reslove, reject) => {
+            setTimeout(() => {
+                console.log("promise请求第1步")
+                reslove(2)
+            }, 1000)
+        })
+
+        promise.then((res) => {
+            return new Promise((reslove, reject) => {
+                console.log("promise请求第2步")
+                reslove(res)
+            })
+        }).then((res) => {
+            console.log("promise请求第3步")
+            console.log("加载完成!" + res)
+            console.log('拿到数据时间' + new Date().toLocaleTimeString())
+        }).catch(() => {
+
+        })
+    }
+
+
+    //Promise练习3
+    function province() {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve('陕西')
+            }, 1000);
+        })
+    }
+    function city(data) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve('西安市')
+            }, 1000);
+        })
+    }
+    function area(data) {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                resolve('雁塔区')
+            }, 1000);
+        })
+    }
+
+    function asyncPromiseA() {
+        province().then(city).then(area).then((data) => {
+            console.log(data)
+        })
+    }
+
+    //Promise.all  
+    /**
+    *Promise之All，等执行所有异步，完事之后执行then回调返回出数组数据类型
+    **/
+    function asyncPromiseAll() {
+        Promise.all([province(), city(), area()]).then((data) => {
+            console.log(data)
+        })
+    }
+
+
+    //=============字符串篇=================================
+    //例1
+    // const RE_DATE = /(\d{4})-(\d{2})-(\d{2})/;
+    // const matchObj = RE_DATE.exec('1999-12-31');
+    // const year = matchObj[1]; // 1999
+    // const month = matchObj[2]; // 12
+    // const day = matchObj[3]; // 31
+
+    //例2
+    const RE_DATE = /(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})/;
+    const matchObj = RE_DATE.exec('1999-12-31');
+    const year = matchObj.groups.year; // 1999
+    const month = matchObj.groups.month; // 12
+    const day = matchObj.groups.day; // 31
+
+
+    //1 将一个数组添加到另一个数组的尾部
+    let arr1 = [1, 2, 3]
+    let arr2 = [4, 5, 6]
+    arr1.push(...arr2)
+    console.log(arr1)
+    //扩展运算符 
+    //1合并数组
+    const newArr = [...arr1, ...arr2]
+    //复制数组
+    const a1 = [1, 2];
+    // 写法一
+    const a2 = [...a1];
+    // 写法二
+    // const [...a2] = a1;
+
+    // （6）Map 和 Set 结构，Generator 函数
+    let map = new Map([
+        [1, 'one'],
+        [2, 'two'],
+        [3, 'three'],
+    ]);
+
+    let arr = [...map.keys()]; // [1, 2, 3]
+
+    //变量go是一个 Generator 函数，执行后返回的是一个遍历器对象，对这个遍历器对象执行扩展运算符，就会将内部遍历得到的值，转为一个数组
+    const go = function* () {
+        yield 1;
+        yield 2;
+        yield 3;
+    };
+    [...go()] // [1, 2, 3]
+
+    /**
+    *Generator 函数有多种理解角度。语法上，首先可以把它理解成，Generator 函数是一个状态机，封装了多个内部状态。
+    *执行 Generator 函数会返回一个遍历器对象，也就是说，Generator 函数除了状态机，还是一个遍历器对象生成函数。
+    返回的遍历器对象，可以依次遍历 Generator 函数内部的每一个状态。
+    *形式上，Generator 函数是一个普通函数，但是有两个特征。一是，function关键字与函数名之间有一个星号；二是，
+    函数体内部使用yield表达式，定义不同的内部状态（yield在英语里的意思就是“产出”）。
+    **/
+    /**下一步，必须调用遍历器对象的next方法，使得指针移向下一个状态。
+     * 也就是说，每次调用next方法，内部指针就从函数头部或上一次停下来的地方开始执行，
+     * 直到遇到下一个yield表达式（或return语句）为止。换言之，Generator 函数是分段执行的，
+     * yield表达式是暂停执行的标记，而next方法可以恢复执行。
+    */
+    function* helloWorldGenerator() {
+        yield 'hello';
+        yield 'world';
+        return 'ending';
+    }
+
+    var hw = helloWorldGenerator();//函数不执行  
+    console.log(hw.next())// { value: 'hello', done: false }
+    console.log(hw.next())// { value: 'world', done: false }
+    console.log(hw.next())// { value: 'ending', done: true }
+    console.log(hw.next())// { value: undefined, done: true } done属性的值true/false，表示遍历结束/未结束。
+
+    function* numbers() {
+        yield 1
+        yield 2
+        return 3
+        yield 4
+    }
+
+    // 扩展运算符
+    [...numbers()] // [1, 2]
+
+    // Array.from 方法
+    Array.from(numbers()) // [1, 2]
+
+    // 解构赋值
+    let [x, y] = numbers();
+    x // 1
+    y // 2
+
+    // for...of 循环
+    for (let n of numbers()) {
+        console.log(n)
+    }
+    // 1
+    // 2
+
+    // Generator 函数返回的遍历器对象，都有一个throw方法，可以在函数体外抛出错误，然后在 Generator 函数体内捕获。
+    //例子 https://es6.ruanyifeng.com/#docs/generator
+     
+
+
+    //Array.form()
+    /**!!
+    **实际应用中，常见的类似数组的对象是 DOM 操作返回的 NodeList 集合，以及函数内部的arguments对象。Array.from都可以将它们转为真正的数组。
+    */
+    let arrayLike = {
+        '0': 'a',
+        '1': 'b',
+        '2': 'c',
+        length: 3
+    };
+    // ES5的写法
+    var _arr1 = [].slice.call(arrayLike); // ['a', 'b', 'c']
+    // ES6的写法
+    let _arr2 = Array.from(arrayLike); // ['a', 'b', 'c']
+
+    //例
+    let lis = $(".center-list").find('li')
+    let arrLi = Array.from(lis).filter(li => {
+        let num = Number($(li).attr('data-id'))
+        return num % 2 == 0;/* 筛选偶数 */
+    })
+
+</script>
+
+</html>
