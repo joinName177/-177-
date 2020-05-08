@@ -1,0 +1,1869 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .workPlanList {
+            display: flex;
+        }
+
+        .workPlanItem {
+            width: 150px;
+            height: 80px;
+            border: 1px solid #d8cece;
+            margin-right: 2px;
+        }
+    </style>
+    <script src="./jquery-2.1.4.js"></script>
+</head>
+
+<body>
+    <section class="workPlanCon">
+        <div class="workPlanList">
+            <div class="workPlanItem" data-menuobj=''></div>
+            <div class="workPlanItem" data-menuobj=''></div>
+            <div class="workPlanItem" data-menuobj=''></div>
+            <div class="workPlanItem" data-menuobj=''></div>
+            <div class="workPlanItem edit_dis" data-menuobj=''></div>
+            <div class="workPlanItem edit_dis" data-menuobj=''></div>
+            <div class="workPlanItem" data-menuobj=''></div>
+            <div class="workPlanItem" data-menuobj=''></div>
+        </div>
+    </section>
+</body>
+<script>
+   /**
+ * 工作规划 BY CK
+ */
+let WorkPlan = function() {
+        const electron = nodeRequire('electron')
+        let loginService = electron.remote.getGlobal("sharedObject").loginService
+            /**当前用户账号 */
+        let loginAccount = electron.remote.getGlobal('sharedObject').account;
+        let loginUserId = electron.remote.getGlobal('sharedObject').userId;
+        const ipc = electron.ipcRenderer
+
+        /**
+         * 多个企业组织树数据集合
+         */
+        let orgTreeList = []
+            // 所有企业列表
+        let allCmyList = [];
+        // 所有企业id
+        let allCmyIds = []
+        let cmyTreeList = []
+            // 第一个企业下登录人的树形组织架构id
+        let loginTreeId = '';
+        // 绑定点击空白隐藏方法时，记录此时点击显示的节点
+        let blankShowDom;
+        let projectManageList = [];
+
+        //审批及沟通点击脑图缓存企业信息
+        let provideTeamId = ''
+        let provideTeamName = ''
+        let provideName = ''
+        let provideStatus = ''
+
+    // ************************树形组织结构 开始***********************//
+    /**
+     * 组织架构初始加载所有企业树一级
+     */
+    let cmyTreeListShow = (type) => {
+        $(allCmyList).each(function(c, item) {
+            let cmyTreeArray = []
+            let treeInfo = {}
+            treeInfo.teamId = item.id
+            treeInfo.name = item.name
+            treeInfo.type = 2
+            treeInfo.id = item.id
+            if (item.shortName) {
+                treeInfo.name = item.shortName
+            } else {
+                treeInfo.name = item.name
+            }
+            let nodeId = `company_${item.id}_2_${item.name}`
+            if (type != 3) { //沟通点击到tree不赋值
+                electron.remote.getGlobal("workplan").nodeId = nodeId
+            }
+            orgTreeList[c] = treeInfo;
+            let isOpen = false;
+            if (type == 3) {
+                item.childs = item.children;
+            }
+            // 有数据则说明需要展开
+            if (item.childs && item.childs.length > 0) {
+                isOpen = true
+            }
+            let total = ''
+            if (type == 1) {
+                total = `<span class="taskorg_tree_count_text">(${item.person || 0})</span>`
+            }
+            // 只有项目经理有设置成员的权限
+            let showTxt = `<span class="taskorg_tree_name_text">${item.name}</span>${total}`
+            let text = `<div class="taskorg_tree_row taskOrgDragHandle" data-name="${item.name}" data-tree-loaded="${isOpen}" ${type == 3 ? `onclick="ChatMember.selectNodeData(event,'${nodeId}')"` : ''}>
+            <span class="taskorg_tree_text" data-container="body" data-toggle="tooltip" title="${item.name}">${showTxt}</span>
+            <span class="name_icon_company chatMemberAuthIcon"  id="name_icon_company" onclick="ProjectTask.findMemberAuth(this)" style="display:none;">
+                <input type="hidden" id="addMemberList">
+                <input type="hidden" id="hadMemberList">
+                </span>
+                </div>`
+        
+            let treeDom = $(`#workPlanOrgTreeItem${c}`)
+            // 工作沟通普通工作组组织架构树
+            if (type == 3) {
+                treeDom = $('.chatMemberContainer #chatMemberTree');
+            }
+            let childData = item.childs || [];
+            if (item.hasChild || (type == 3 && item.children.length > 0)) {
+                if (childData.length > 0) {
+                    let ptobj = {
+                        cmyId: item.id,
+                        cmyName: item.name,
+                        pid: item.id,
+                        pname: item.name,
+                        ptype: item.type,
+                        name: text,
+                        treeDom: treeDom,
+                        cmyIndex: c //企业排序下标
+                    }
+                    childData = cmyChildRecu(childData, undefined, ptobj, type)
+                } else {
+                    childData = true
+                }
+            } else {
+                childData = false;
+            }
+
+            cmyTreeArray.push({
+                "text": text,
+                "id": nodeId,
+                "children": childData,
+                "state": {
+                    "opened": isOpen,
+                    // "selected": isSelect
+                }
+            });
+            cmyTreeList[c] = cmyTreeArray;
+            if (type == 1) {
+                companyRoleTree(cmyTreeArray, treeDom, type)
+            } else if (type == 2) {
+                workStatement.companyworkStateTree(cmyTreeArray, treeDom, type)
+            } else if (type == 3) {//工作沟通-普通工作组
+                ChatMember.setProjectManage(projectManageList);
+                ChatMember.companyChatTree(cmyTreeArray, treeDom, type)
+            }
+        });
+    }
+
+    // 审批刷新脑图
+    ipc.on('skip_mindMap_info', (event, arg) => {
+        $('#appNav .user[data-in="workplan"] a').click()
+        provideTeamId = arg[2]
+        provideTeamName = arg[3]
+        provideName = arg[4]
+        provideStatus = arg[5]
+        pageShowMindMap({
+            planId:arg[0],
+            typeId:arg[1],
+            type:'provide'
+        })
+    })
+
+    /**
+     * 组织架构初始查询
+     */
+    let queryTreeData = (type) => {
+        let param = {
+            'account': electron.remote.getGlobal('sharedObject').account,
+            "isAllOrg": 1,
+        }
+        // 是否默认展示到登录人  0 否 1 是）
+        if (type == 1) {//工作计划默认展示到登录人
+            param.defaultLoginUser = 1;
+        }
+        let treeHtm = ''
+         $.ajax({
+                    headers:{loginToken:electron.remote.getGlobal('sharedObject').loginToken},
+            type: 'post',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("system", "oa");
+            },
+            url: loginService + '/team/permission/findAllEnterpriseTree',
+            data: JSON.stringify(param),
+            contentType: 'application/json',
+            success: function (data) {
+                if (data.returnCode === 0) {
+                    // 所有企业
+                    allCmyList = data.dataList || [];
+                    // 初始化每个企业树的数据对象
+                    $(data.dataList || []).each(function (n, item) {
+                        orgTreeList.push({});
+                        allCmyIds.push(item.id);
+                        treeHtm += `<div class="siderOrgTreeItem workPlanOrgTreeItem" id="workPlanOrgTreeItem${n}" data-pos="${n}" data-orgid="${item.id}" data-orgname="${item.name || ''}"></div>`
+                    });
+                    $("[data-toggle='tooltip']").tooltip();
+
+                    $('.workPlanOrgTreeList').html(treeHtm);
+                    cmyTreeListShow(type)
+                } else {
+                    toastr["error"](data.returnMessage, "信息提示");
+                }
+
+            },
+            error: function (data) {
+                ErrorToastr.authorityMessage(data)
+            }
+        })
+    }
+    /**
+     * 沟通组织架构初始查询
+     */
+    let queryChatTreeData = (muid, id) => {
+        // 此处查询所有，不控权限，则不传userId或者传0
+        let param = {
+            'userId': 0,
+            'id': id,
+        }
+        // let treeHtm = ''
+         $.ajax({
+                    headers:{loginToken:electron.remote.getGlobal('sharedObject').loginToken},
+            type: 'post',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("system", "oa");
+            },
+            url: loginService + '/im-consumer/project/findProjectTree',
+            data: param,
+            success: function (data) {
+                if (data.returnCode === 0) {
+                    // 所有企业
+                    if (data.data && $.isPlainObject(data.data)) {
+                        allCmyList = [data.data];
+                    } else {
+                        allCmyList = [];
+                    }
+                    // 初始化每个企业树的数据对象
+                    $(allCmyList || []).each(function (n, item) {
+                        orgTreeList.push({});
+                        allCmyIds.push(item.id);
+                        // treeHtm += `<div class="siderOrgTreeItem workPlanOrgTreeItem" id="workPlanOrgTreeItem${n}" data-pos="${n}" data-orgid="${item.id}" data-orgname="${item.name || ''}"></div>`
+                    });
+                    $("[data-toggle='tooltip']").tooltip();
+                    // $('.chatMemberContainer #chatMemberTree').html(treeHtm);
+                    cmyTreeListShow(3)
+                    // ChatMember.ChatMemberList(allCmyList);
+                } else {
+                    toastr["error"](data.returnMessage, "信息提示");
+                }
+
+            },
+            error: function (data) {
+                toastr["error"]('查询失败', "信息提示");
+            }
+        })
+    }
+    /**
+     * 初始树形结构查询
+     */
+    let queryWorkTreeData = (obj, type, cmyInfo) => {
+        let childData = [];
+        let treeHtm = ''
+        let param = {
+            account: electron.remote.getGlobal('sharedObject').account,
+            id: cmyInfo || obj.findId,
+            notAccount: '',
+            permissionType: 4,
+            teamId: cmyInfo || obj.cmyId,
+            type: parseInt(obj.type) || 2//2 企业 3 部门 31岗位
+        }
+         $.ajax({
+                    headers:{loginToken:electron.remote.getGlobal('sharedObject').loginToken},
+            type: 'post',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("system", "oa");
+            },
+            url: loginService + '/team/permission/findEnterpriseTree',
+            data: JSON.stringify(param),
+            contentType: 'application/json',
+            async: false,
+            success: function (data) {
+                if (data.returnCode === 0) {
+                    if (cmyInfo) {//首次查询企业数据
+                        // 所有企业
+                        allCmyList = [data.data] || [];
+                        // 初始化每个企业树的数据对象
+                        $(data.data || []).each(function (n, item) {
+                            orgTreeList.push({});
+                            allCmyIds.push(item.id);
+                            treeHtm += `<div class="siderOrgTreeItem workPlanOrgTreeItem" id="workPlanOrgTreeItem${n}" data-pos="${n}" data-orgid="${item.id}" data-orgname="${item.name || ''}"></div>`
+                        });
+                        $("[data-toggle='tooltip']").tooltip();
+                        $(obj).html(treeHtm);
+                        cmyTreeListShow(type)
+                    } else {//点击展开查询子节点数据
+                        let arr = data.data.childs || []
+                        // let cmyTreeArray = obj.treeDom.jstree(true).get_json(); //获取整棵树的json数据
+                        // setChildTree(cmyTreeArray, obj, arr, type)
+                        // workStatement.companyworkStateTree(cmyTreeArray, obj.treeDom)
+                        // 懒加载子节点数据
+                        let ptobj = {
+                            cmyId: obj.cmyId,
+                            cmyName: obj.cmyName,
+                            pid: obj.findId,
+                            pname: obj.findName,
+                            ptype: 2,
+                            name: obj.findName,
+                        }
+                        childData = cmyChildRecu(arr, undefined, ptobj, type)
+                    }
+                } else {
+                    toastr["error"](data.returnMessage, "信息提示");
+                }
+            },
+            error: function (data) {
+                ErrorToastr.authorityMessage(data)
+            }
+        })
+        return childData;
+    }
+
+    /**
+     * 树形子数据递归修改信息
+     * @param {*} arrays 要查询修改的数据
+     * @param {*} children 拓展的孩子数组指针
+     * @param {*} parentInfo 父节点信息
+     * @param {*} type 区分工作报告/规划 1:工作计划
+     */
+    let cmyChildRecu = (arrays, children, parentInfo, type) => {
+        let newarr = [];
+        let _pInfo = {};
+        if (children) {
+            newarr = children;
+        }
+        if (parentInfo != undefined) {
+            _pInfo = parentInfo;
+        }
+        $.each(arrays, (i, item) => {
+            let name
+            let typeadress
+            let titName = ''
+            let total = ''
+            if (type == 1) {
+                total = `<span class="taskorg_tree_count_text">(${item.person || 0})</span>`
+            }
+            let showName = `<span class="taskorg_tree_name_text">${item.name || name}</span>${total}`
+            let isOpen = false;
+            if (type == 3) {
+                item.childs = item.children;
+            }
+            // 有数据则需要展开
+            if (item.childs && item.childs.length > 0) {
+                isOpen = true;
+            }
+            // 岗位信息
+            let roleInfo = ''
+            let roleChat = false
+            if (item.type == 0) {
+                name = '用户'
+                typeadress = 'account_'
+                showName = `${item.name || name}${item.roleName ? '-' + item.roleName : ''}`
+                titName = showName
+                roleInfo = `@role_${item.roleId}_31_${item.roleName}`
+                if (type == 3) {
+                    roleChat = true
+                    if (item.identity == 1 || item.identity == 2) {
+                        let manageObj = JSON.stringify(projectManageList);
+                        // 存储项目经理和联系人
+                        if (!manageObj.includes(item.id)) {
+                            projectManageList.push({
+                                userType: item.identity,
+                                userId: item.id,
+                                username: item.name,
+                            });
+                        }
+                    }
+                }
+            } else if (item.type == 3) {
+                // name = '部门'
+                typeadress = 'department_'
+            } else {
+                // name = '岗位'
+                typeadress = 'duties_'
+            }
+            let curId = item.id;
+            if (type == 2 && item.type == 0) {//工作报告
+                curId = item.rid;
+            }
+            // 角色展示
+            let roleType = ''
+            if (item.identity == 2) {
+                roleType = '<span class="org_tree_roletype">-项目经理</span><i class="img_icon manage_icon"></i>';
+            } else if (item.identity == 1) {
+                roleType = `<span class="org_tree_roletype">(联系人)</span>`
+            }
+            let thisNodeId = `${typeadress}${curId}_${item.type}_${item.name}@parentId_${_pInfo.pid}_${_pInfo.ptype}_${_pInfo.pname}@company_${_pInfo.cmyId}_2_${_pInfo.cmyName}${roleInfo}`
+            let text = `<div class="taskorg_tree_row " data-name="${item.name}" data-tree-loaded="${isOpen}" ${type == 3 ? `onclick="ChatMember.selectNodeData(event,'${thisNodeId}')"` : ''}>
+                <span class="taskorg_tree_text" data-container="body" data-toggle="tooltip" title="${titName}">${showName}</span>${roleType}
+                ${roleChat && item.id != electron.remote.getGlobal("sharedObject").userId ? `<div class="chat_member_jstree_chat" ${electron.remote.getGlobal("sharedObject").userId != '' ?
+                    `onclick="ChatMember.addPrivateChatFn(event,${item.id},'${item.name}','${item.account}')"` : ''}>
+                <span class="chat_icon chat_member_task_chat" data-placement="top" data-original-title="沟通" data-toggle="tooltip"></span></div>`: ''}
+                </div>`
+            // 第一个企业当前登录人
+            if (item.type == 0 && _pInfo.cmyIndex == 0 && curId == loginUserId) {
+                loginTreeId = thisNodeId;
+            }
+            let childObj = {
+                "id": thisNodeId,
+                "text": text,
+                "state": {
+                    "opened": isOpen
+                }
+            }
+            //有childs的时候递归
+            if (item.childs != undefined && item.childs != '' && item.childs != null && item.childs instanceof Array) {
+                childObj.children = []; //有childs不断扩充新的children对象
+                newarr.push(childObj)
+                let ptInfo = {
+                    pid: item.id,
+                    pname: item.name,
+                    ptype: item.type,
+                    cmyId: _pInfo.cmyId,
+                    cmyName: _pInfo.cmyName,
+                    cmyIndex: _pInfo.cmyIndex,
+                }
+                cmyChildRecu(item.childs, childObj.children, ptInfo, type);
+            } else {
+                if (item.hasChild > 0) {
+                    let newTxt = `<div class="taskorg_tree_row" data-name="${item.name}" data-tree-loaded="false">
+                    <span class="taskorg_tree_text" data-container="body" data-toggle="tooltip" title="${titName}">${showName}</span>
+                    </div>`
+                    childObj = {
+                        "id": thisNodeId,
+                        "text": newTxt,
+                        "state": {
+                            "opened": false
+                        },
+                        children: true
+                    }
+                }
+                newarr.push(childObj)
+            }
+        })
+        return newarr;
+    }
+    /**
+     * 查询树的子结构
+     */
+    let queryTreeChild = (obj) => {
+        let childData = []
+        let param = {
+            'account': electron.remote.getGlobal('sharedObject').account,
+            "id": obj.findId,
+            "type": parseInt(obj.type),
+            'teamId': obj.cmyId,
+            "isAllOrg": 0,
+        }
+         $.ajax({
+                    headers:{loginToken:electron.remote.getGlobal('sharedObject').loginToken},
+            type: 'post',
+            dataType: 'json',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("system", "oa");
+            },
+            url: loginService + '/team/permission/findAllEnterpriseTree',
+            data: JSON.stringify(param),
+            contentType: 'application/json',
+            async: false,
+            success: function (data) {
+                if (data.returnCode === 0) {
+                    let arr = data.dataList || []
+                    let ptobj = {
+                        cmyId: obj.cmyId,
+                        cmyName: obj.cmyName,
+                        pid: obj.findId,
+                        pname: obj.findName,
+                        ptype: 2,
+                        name: obj.findName,
+                    }
+                    childData = cmyChildRecu(arr, undefined, ptobj)
+                } else {
+                    toastr["error"](data.returnMessage, "信息提示");
+                }
+
+            },
+            error: function (data) {
+                ErrorToastr.authorityMessage(data)
+            }
+        })
+        return childData;
+    }
+    /**
+     * 加载子数据
+     * treeArr 组织架构树形数据
+     * obj 源节点信息
+     * newArr 要添加的子数据
+     */
+    let setChildTree = (treeArr, obj, newArr, type) => {
+        $.each(treeArr, (i, item) => {
+            let selectArray = (item.id + "").split('@');
+            let rowDom = $(".workPlanOrgTreeItem").find(`.jstree-anchor[id="${item.id}_anchor"]`).find('.taskorg_tree_row');
+            $('.taskOrgDataTmp').html(rowDom.prop('outerHTML'));
+            if (selectArray[0].split("_")[1] == obj.findId && selectArray[0].split("_")[2] == obj.type) {
+                item.state.opened = true
+                // 设置为已加载数据标识，后续不再请求数据
+                $('.taskOrgDataTmp').find('.taskorg_tree_row').attr('data-tree-loaded', true);
+                if (item.text && item.text.indexOf('taskorg_tree_row') > -1) {
+                    item.text = $('.taskOrgDataTmp').html();
+                }
+                let ptobj = {
+                    cmyId: obj.cmyId,
+                    cmyName: obj.cmyName,
+                    pid: obj.findId,
+                    pname: obj.findName,
+                    ptype: 2,
+                    name: item.text,
+                }
+                item.children = cmyChildRecu(newArr, undefined, ptobj, type)
+            } else {
+                if (item.children instanceof Array) {
+                    setChildTree(item.children, obj, newArr, type)
+                } else {
+                    return;
+                }
+            }
+        })
+    }
+    /**
+     * 请求树形数据
+     */
+    let getTreeChildData = (node, control) => {
+        let childData = []
+        let getInfo = WorkPlan.getParam(node.id);
+        let findId = getInfo.curId
+        let type = getInfo.curType
+        let findName = getInfo.curName
+        // 2.9版
+        let obj = {
+            findId: findId,
+            findName: findName,
+            cmyId: getInfo.cmyId,
+            cmyName: getInfo.cmyName,
+            name: node.text,
+            type: type,
+        }
+        if (control == "plan") {
+            childData = queryTreeChild(obj)
+
+        } else if (control == "workReport") {
+            childData = queryWorkTreeData(obj, 2)
+        }
+        return childData;
+    }
+    // 懒加载
+    let companyRoleTree = (companyTreeArray, treeDom) => {
+        treeDom.jstree("destroy")
+        treeDom.jstree({
+            "core": {
+                'data': function (node, cb) { //懒加载 请求后台数据
+                    //注：children设置为true时，点击展开按钮才会触发此方法
+                    let data = companyTreeArray;
+                    if (node.id != "#") {
+                        data = getTreeChildData(node, 'plan');
+                    }
+                    cb.call(this, data)
+                },
+                "themes": {
+                    "name": "taskorg",
+                    "icons": false,
+                    "dots": false,
+                    "url": true
+                },
+                'multiple': true,
+                "dblclick_toggle": false, //是否可tree的双击展开
+            },
+            "types": {
+                "default": {
+                    "icon": "none"
+                },
+                "file": {
+                    "icon": "none"
+                }
+            },
+            "plugins": ["types", "wholerow"],
+        }).on('load_node.jstree', function (e, node) {
+            let loaded = $(e.target).attr('data-loaded');
+            let index = $(e.target).index()
+            // 初始加载组织架构树才设置默认选中
+            if (index == 0 && loaded != 1) {
+                $(e.target).attr('data-loaded', 1);
+                if (loginTreeId) {
+                    loginTreeId = '';
+                }
+                $('.workPlanOrgTreeList [data-toggle="tooltip"]').tooltip();
+            }
+        }).on('open_node.jstree', function (e, node) {
+            let inst = node.instance;
+            let selectArray = (node.node.id + "").split('_');
+            //展开企业时，取消选中同一棵树的上个选中节点
+            if (selectArray[0] == 'company') {
+                let getSel = $(e.target).jstree(true).get_selected(true);
+                if (getSel.length > 0) {
+                    inst.deselect_node(getSel[0]);
+                }
+            }
+            //使用懒加载模式，下面方法不需要
+            // $('.taskOrgDataTmp').html(node.node.text)
+            // let isLoaded = $('.taskOrgDataTmp').find('.taskorg_tree_row').attr('data-tree-loaded');
+            // if (isLoaded == 'true') {已加载过则不再重新刷新加载数据
+            //     return;
+            // }
+            // getTreeChildData(node.node,'plan');
+            $('.workPlanOrgTreeList [data-toggle="tooltip"]').tooltip();
+            // $("a.jstree-disabled>i.jstree-checkbox").hide()
+        }).on('close_node.jstree', function (e, node) {
+        }).on('select_node.jstree', function (e, node) {
+            electron.remote.getGlobal('workplan').nodeId = node.node.id
+            // 取消选中其他企业的树
+            $(".workPlanOrgTreeItem").each(function (i, dom) {
+                if (i != $(e.target).index()) {
+                    $(dom).jstree("deselect_all", true);
+                }
+            });
+            if (!$(e.target).hasClass('active')) {
+                $(".workPlanOrgTreeItem").removeClass('active');
+                $(e.target).addClass('active');
+            }
+            // 查询计划列表数据
+            findPlanList();
+            $('.workPlan_me').removeClass('on')
+            $('.add_plan').show()
+            // 标题显示
+            let curName = WorkPlan.getParam().curName;
+            $('#workPlanContainer').find('.workPlanPageHeader .tit_name').html(`${curName}-计划列表`);
+            // 导航显示
+            $('.workPlanPageHeader').find('.workPlanListNav').hide();
+            // 标题隐藏
+            $('.workPlanPageHeader').find('.tit_name').show();
+        });
+    }
+    // ***********************树形组织结构 结束************************//
+
+    /**
+     * 我的规划
+     */
+    let queryPlanMe = () => {
+        // 查询计划列表数据
+        findPlanList(true);
+        $('.add_plan').hide()
+        $('.workPlan_me').off().click(function(){
+            $(this).addClass('on')
+            $('.add_plan').hide()
+            $('.jstree-wholerow-clicked').removeClass('jstree-wholerow-clicked')
+            $('.jstree-clicked').removeClass('jstree-clicked')
+            let filterBox = $('#workPlanContainer').find('.workPlanFiltersTermBox')
+            filterBox.find('.filterSearchVal').val('');
+            filterBox.find('.filter-status-small>li').addClass('active');
+            filterBox.find('.filter-status-small>li[value="5"]').removeClass('active');
+            findPlanList(true);
+            // 导航显示
+            $('.workPlanPageHeader').find('.workPlanListNav').show();
+            // 标题隐藏
+            $('.workPlanPageHeader').find('.tit_name').hide();
+        })
+    }
+
+    /**
+     * 侧边栏拖动宽度
+     */
+    let sidebarDrag = () => {
+        var isResizing = false;
+        $('.taskDragBar').off().on('mousedown', function (e) {
+            isResizing = true;
+            $(document).on('mousemove', function (e) {
+                // 禁用文本选中
+                window.getSelection().empty();
+                if (!isResizing) return;
+                var container = $('.taskOrgSidebar');
+                var offsetRight = (e.clientX - container.offset().left - container.width());
+                let newWid = (container.width() + offsetRight);
+                if (container.width() <= 172 && offsetRight < 0) {
+                    newWid = 172
+                } else if (container.width() >= 280 && offsetRight > 0) {
+                    newWid = 280
+                }
+                container.width(newWid);
+            }).on('mouseup', function (e) {
+                isResizing = false;
+            });
+        });
+    }
+    /**
+     * 搜索结果组装、展示
+     * @param {*} list 
+     */
+    let showSearchResult = (list) => {
+        let html = ''
+        $.each(list, (i, item) => {
+            let cmyName = ''
+            let deptList
+            let roleName
+            let roleId
+            let departName
+            let departId
+            let cmyId = ''
+            if (item.deptchain) {
+                cmyId = item.deptchain.split('@')[1]
+                deptList = item.deptchain.split('@')[2].split("###")
+                if (deptList.length > 3) {
+                    departId = deptList[0]
+                    departName = deptList[1]
+                    roleId = deptList[2]
+                    roleName = deptList[3]
+                } else {
+                    departId = deptList[0]
+                    departName = deptList[1]
+                }
+            }
+            // 查询企业名称
+            $(allCmyList).each(function (a, item) {
+                if (item.id == cmyId) {
+                    cmyName = item.name || '';
+                    return;
+                }
+            });
+            let name = `${cmyName ? cmyName + '-' : ''}${departName ? departName + '-' : ''}${roleName ? roleName + '-' : ''}${item.username}`
+            // account_${item.id}_0@parentId_${departId}_31@company_${cmyId}_2
+            let thisNodeId = `account_${item.id}_0_${item.username}@parentId_${departId}_3_${departName}@company_${cmyId}_2_${cmyName}@role_${roleId}_31_${roleName}`;
+            html += `<li data-cmyid="${cmyId}" data-value="${thisNodeId}"
+            data-depart='${departId}_${departName}' data-role='${roleId}_${roleName}' data-user="${item.id}_${item.username}" data-toggle="tooltip" title="${name}" data-container="body">${name}</li>`
+        })
+        $('.org-menu-search-list ul').html(html)
+        $('.org-menu-search-list [ data-toggle="tooltip"]').tooltip();
+        $("[data-toggle='tooltip']").tooltip();
+        $('.org-menu-search-list').show()
+        $('.org-menu-search-list ul li').off().on('click', function () {
+            $(this).addClass('active').siblings().removeClass('active')
+            let dataVal = $(this).attr('data-value')
+            electron.remote.getGlobal('workplan').nodeId = dataVal;
+            findPlanList();
+        })
+    }
+
+    // *******************子页面操作**********************//
+    // 组装单项tab标签代码
+    let setTabHtm = (item, id,typeId,editMemberAuth) => {
+        let getId = $(item).attr('data-id')
+        let name = $(item).find('.tit_name').text();
+        let status = $(item).attr('data-status');
+        let liableId = $(item).attr('data-liableid') || '';
+        let createUser = $(item).attr('data-createUser') || '';
+        let pageType = ''
+        if (liableId != loginUserId && createUser != loginUserId) {
+            pageType = 'other';
+        }
+        // 编辑成员权限
+        if(editMemberAuth){
+            pageType = 'editMember';
+        }
+        let active = getId == id ? 'active' : '';
+        let statusTxt = '', statusClass = '';
+        if (status == 4) {
+            statusTxt = '已派发';
+            statusClass = 'yes_disb';
+        } else if (status == 3) {
+            statusTxt = '部分派发';
+            statusClass = 'yes_disb';
+        } else if (status == 2) {
+            statusTxt = '审核中';
+            statusClass = 'review';
+        } else if (status == 5) {
+            statusTxt = '已完成';
+            statusClass = 'finish';
+        } else {
+            statusTxt = '草稿';
+            statusClass = 'no_disb';
+        }
+        let tab = `<li class="planTabItem ${active}" data-id="${getId}" data-typeId ="${typeId}" data-pagetype="${pageType}">
+                <span class="plan_name">${name}</span>
+                <span class="plan_tab_sign ${statusClass}">${statusTxt}</span>
+                <i class="img_icon tab_del_icon"></i>
+                </li>`
+        return tab;
+    }
+    /**
+     * 渲染计划标签
+     * planId:点击的计划id
+     * tabHtm：添加的标签html代码
+     * nodeElm:计划列表单项节点
+     */
+    let planTabShow = (fromMsg, infoObj) => {
+        let id = '';
+        let getTabHtm = '';
+        let nodeElm = '';
+        if (infoObj) {
+            id = infoObj.planId;
+            getTabHtm = infoObj.tabHtm;
+            nodeElm = infoObj.nodeElm;
+        }
+        let tabHtm = '';
+        let firstTab = '';
+        // let tabNum = 0;
+        if (fromMsg == 'create') {//外层列表点击创建计划
+            firstTab = `<li class="planTabItem active">
+            <span class="plan_name">目标计划</span>
+            <span class="plan_tab_sign no_disb">草稿</span>
+            <i class="img_icon tab_del_icon"></i>
+            </li>`
+            // tabNum++;
+        } else if (fromMsg == 'share') {//外层列表时点击共享计划
+            firstTab = getTabHtm;
+            // tabNum++;
+        } else if (fromMsg == 'list') { //外层列表点击计划
+            firstTab = setTabHtm(nodeElm, id,infoObj.typeId,infoObj.editMemberAuth);
+        }
+        // 显示5个计划标签的方法，使用以下代码：
+        // $('.workPlanList .workPlanItem').each(function (i, item) {
+        //     if (tabNum >= 3) {
+        //         return false;
+        //     }
+        //     let tab = setTabHtm(item,id);
+        //     if (findType != 'create' && findType != 'share' && getId == id) {//外层列表点击创建计划//外层列表时点击共享计划
+        //         firstTab = tab
+        //     } else {
+        //         tabHtm += tab
+        //     }
+        // });
+        // tabHtm = firstTab + tabHtm;
+        // 被点击的计划放第一个位置
+        tabHtm = firstTab;
+        $('.planTabBox').html(tabHtm);
+        tabChange();
+    }
+    /**
+     * 页面标签切换
+     */
+    let tabChange = () => {
+        let itemDom = $('#workPlanSubPageCon').find('.planTabBox .planTabItem');
+        itemDom.off().on('click', function (e) {
+            $('.timeInput').datetimepicker('hide');
+            $(this).parents('.planTabBox').find('.planTabItem').removeClass('active');
+            $(this).addClass('active');
+            let planId = $(this).attr('data-id');
+            // 查询编辑人员权限
+            let memberAuth=WorkPlanEdit.checkMemberAuth({
+                planId:planId
+            });
+            let pageType = $(this).attr('data-pagetype') || '';
+            // 共享计划不显示头部计划列表标题
+            if (pageType == 'share') {
+                $('#workPlanSubPageCon').find('.back_btn_box>.tit_name').hide();
+            } else {
+                $('#workPlanSubPageCon').find('.back_btn_box>.tit_name').show();
+            }
+            // 他人计划不可编辑
+            if(memberAuth){
+                $(this).attr('data-pagetype','editMember')
+                $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-pagetype','editMember');
+            }else{
+                if(pageType=='editMember'){
+                    $(this).attr('data-pagetype','other');
+                    $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-pagetype', 'other');
+                }else{
+                    $(this).attr('data-pagetype',pageType);
+                    $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-pagetype', pageType);
+                }
+            }
+            pageShowMindMap({
+                planId:planId,
+                type:'tabAuth'
+            });
+        });
+        // 删除按钮事件
+        itemDom.find('.tab_del_icon').off().on('click', function (e) {
+            e.stopPropagation();
+            let prevPage = $(this).parents('.planTabItem').prev();
+            let nextPage = $(this).parents('.planTabItem').next();
+            if (prevPage.length > 0 && !prevPage.hasClass('active')) {
+                prevPage.click();
+            } else if (nextPage.length > 0 && !nextPage.hasClass('active')) {
+                nextPage.click();
+            } else if (nextPage.length == 0 && prevPage.length == 0) {
+                WorkPlan.backMainPage()
+            }
+            // 移除头部tab标签
+            $(this).parents('.planTabItem').remove();
+        });
+    }
+
+    /**
+    * 跳转到脑图  
+    */
+    let pageShowMindMap = (paramObj) => {
+        paramObj=paramObj?paramObj:{};
+        let liableId=$('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-liableId');
+        let createUser=$('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-createUser');
+        $('#workPlanSubPageCon').show();
+        $('#workPlanSubPageCon').attr('data-id', paramObj.planId||'');
+        $('#workPlanSubPageCon').attr('data-typeId', paramObj.typeId||'');
+        let pageContentBody = $('.workPlanMindMap');
+        if(paramObj.type == 'provide'){ //审批及沟通详情点击
+            provideMindMapTab(paramObj.type,paramObj.planId,paramObj.typeId)
+        }
+        App.blockUI(window);
+         $.ajax({
+            headers:{loginToken:electron.remote.getGlobal('sharedObject').loginToken},
+            type: "GET",
+            cache: false,
+            url: '../workPlan/OKRmindMap.html',
+            dataType: "html",
+            success: function (res) {
+                App.unblockUI(window);
+                pageContentBody.html(res);
+                App.fixContentHeight(); // fix content height
+                App.initAjax(); // initialize core stuff
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                toastr["error"](thrownError, "Error")
+                App.unblockUI(window);
+            },
+            async: false
+        });
+        // 点击标签时，不再用重新调用查询编辑人员接口
+        if(paramObj.type!='tabAuth'){
+            WorkPlan.editAuthMemberSet({
+                planId:paramObj.planId,
+                liableId:liableId,
+                createUser:createUser
+            });
+        }
+    }
+
+    /**
+     * 审批及沟通点击脑图处理标签
+     */
+    let provideMindMapTab = (type,planId,typeId) => {
+        let statusTxt = '', statusClass = '';
+        if (provideStatus == 4) {
+            statusTxt = '已派发';
+            statusClass = 'yes_disb';
+        } else if (provideStatus == 3) {
+            statusTxt = '部分派发';
+            statusClass = 'yes_disb';
+        } else if (provideStatus == 2) {
+            statusTxt = '审核中';
+            statusClass = 'review';
+        } else if (provideStatus == 5) {
+            statusTxt = '已完成';
+            statusClass = 'finish';
+        } else {
+            statusTxt = '草稿';
+            statusClass = 'no_disb';
+        }
+        $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-teamid', provideTeamId);
+        $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-teamname', provideTeamName);
+        $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-myself', 'true');
+        $('#workPlanSubPageCon').find('.tit_name').html(`${provideTeamName}-计划列表`);
+        $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-pagetype', type || '');
+        let tabHtm = `<li class="planTabItem active" data-id="${planId}" data-typeId ="${typeId}" data-pagetype="">
+        <span class="plan_name">${provideName}</span>
+        <span class="plan_tab_sign ${statusClass}">${statusTxt}</span>
+        <i class="img_icon tab_del_icon"></i>
+        </li>`
+        $('.planTabBox').html(tabHtm);
+        tabChange()
+    }
+
+    /**
+     * 查询计划列表
+     */
+    let findPlanList = (mySelf,issearch) => {
+        $('.planTabItem.active').attr('data-mainId','')
+        let curName = WorkPlan.getParam().curName;
+        $('#workPlanContainer').find('.workPlanPageHeader .tit_name').html(`${mySelf ? '我的规划' : curName}-计划列表`);
+        let getInfo = WorkPlan.getParam();
+        let type=0
+        if(mySelf){
+            type=$('.workPlanListNav>li.active').attr('data-type');
+        }
+        /**
+         * status:0所有 1未派发 4已派发 3部分已派发 2审核中
+         */
+        let deptId = 0, roleId = 0;
+        let filtersObj = checkFilter();
+        // 查询个人需要传部门岗位
+        if (getInfo.curType == 0) {
+            deptId = getInfo.parentId;
+            roleId = getInfo.roleId;
+        }
+        let param = {
+            operateUser: loginUserId,
+            ascriptionId: getInfo.curId,
+            ascriptionType: getInfo.curType,
+            keyword: filtersObj.keyword,
+            status: filtersObj.status,
+            deptId: deptId,
+            roleId: roleId,
+            mySelf:mySelf ? type : 0,
+            // mySelfId:mySelf ? loginUserId : undefined,
+        }
+         $.ajax({
+                    headers:{loginToken:electron.remote.getGlobal('sharedObject').loginToken},
+            type: "post",
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader("system", "oa");
+                App.blockUI(window)
+            },
+            url: loginService + "/task/work/plan/list",
+            dataType: 'json',
+            contentType: "application/json",
+            data: JSON.stringify(param),
+            success: function (data) {
+                if (data.returnCode == 0) {
+                    let numData = data.data || [];
+                    // 筛选统计
+                    if(numData.length>0){
+                        $.each(numData,function(i,item){
+                            $('.workPlanListNav>li>.sta_num').eq(i).html(`(${numData[i]})`);
+                        });
+                    }
+                    let dataList = data.dataList || [];
+                    setPlanList(dataList,mySelf,issearch);
+                } else {
+                    toastr["error"](data.returnMessage, "信息提示")
+                    WorkPlan.noDataShow($('.workPlanCon .workPlanList'));
+                }
+            },
+            error: function (data) {
+                toastr["error"](data.returnMessage, "信息提示");
+                WorkPlan.noDataShow($('.workPlanCon .workPlanList'));
+            },
+            complete: function (xhr) {
+                App.unblockUI(window)
+            },
+        });
+    }
+    /**
+     * 渲染计划列表
+     */
+    let setPlanList = (list,mySelf,issearch) => {
+        let htm = '';
+        // if(mySelf){
+        //     if(!issearch){
+        //         $('.workPlan_me span').html(`（${list.length}）`)
+        //     }
+        // }
+        if (list.length == 0) {
+            WorkPlan.noDataShow($('.workPlanCon .workPlanList'));
+            return;
+        }
+        
+        $(list).each(function (i, item) {
+            //status:1未派发 4已派发 3部分已派发 2审核中 5已完成
+            let statusTxt = '', statusClass = '';
+            let status = item.status;
+            let typeStatus = item.ascriptionType //0岗位级 2企业级 3部门级
+            let typeStatusText = ''
+            if (status == 4) {
+                statusTxt = '已派发';
+            } else if (status == 3) {
+                statusTxt = '部分派发';
+            } else if (status == 2) {
+                statusTxt = '审核中';
+            } else if (status == 5) {
+                statusTxt = '已完成';
+            } else {
+                statusTxt = '草稿';
+            }
+            if(typeStatus == 0){
+                typeStatusText = '岗位级'
+                statusClass = 'review';
+            }else if(typeStatus == 2){
+                typeStatusText = '企业级'
+                statusClass = 'yes_disb';
+            }else if(typeStatus == 3){
+                typeStatusText = '部门级'
+                statusClass = 'finish';
+            }
+            // 菜单所属数据缓存
+            // let menuObj = $.extend({}, item,{
+            //     planId: item.id,
+            //     planName: item.name,
+            //     liableId:item.createUser,
+            // });
+            let menuObj={
+                createUser:item.createUser,
+                liableId:item.liableUser,
+                planId:item.id,
+                status: item.status, 
+                planName: item.name, 
+                typeId:item.typeId,
+                teamId:item.teamId,
+                property:item.property
+            }
+            // 可编辑标识
+            let editAuth = false;
+            // let editFlag = '<span class="edit_enable_bar"></span>';
+            // 别人创建的计划不可编辑
+            if(item.liableUser == loginUserId||item.createUser == loginUserId){
+                editAuth=true;
+            }
+            menuObj.editAuth=editAuth
+            let process = `
+                <div class="progress_box">
+                    <div class="progress_bar">
+                        <span class="progress_bar_in" style="width:${item.process || 0}%"></span>
+                    </div>
+                    <span class="progress_num">${item.process || 0}%</span>
+                </div>`
+            let fromType = item.isCreate == 0 ? `派发` : '创建';
+            let redDot = ``
+            if (item.isRead == 0) {//派发才有红点
+                redDot = `<span class="plan_red_dot"></span>`;
+            }
+            let showName = WorkPlan.cutName(item.liableUsername || '', 2, -1) || '';
+            htm += `<div class="workPlanItem" data-id="${item.id}" data-teamId='${item.teamId}' data-teamName='${item.teamName}' 
+            data-name="${item.name}" onclick="WorkPlan.listDetailShow(${item.id},${item.typeId},'list',this)" data-typeid="${item.typeId}" data-status="${item.status}"
+             data-liableid="${item.liableUser || ''}"  data-createUser="${item.createUser || ''}" data-itemobj='${JSON.stringify(item)}' data-menuobj='${JSON.stringify(menuObj)}'>
+                <div class="status_bar_top ${statusClass}"></div>
+                <div class="opt_btn_out ${editAuth ? '' : 'noshow'}">
+                    <em class="plan_more_icon"></em>
+                    <ul class="optBtnMenu more_btn_box"></ul>
+                </div>
+                <span class="plan_status_sign ${statusClass}">${typeStatusText}</span>
+                <div class="plan_cont_row plan_name_row">
+                ${redDot}
+                <span class="plan_user_head ${item.liableUsername ? '' : 'noshow'}">${showName}</span>
+                <p class="tit_name">${item.name}</p>
+                </div>
+                <div class="progress_out">${process}</div>
+                <div class="plan_from">来源：<span class="from_name">${item.createUsername || ''} </span>${fromType}</div>
+                <div class="limit_time">截止时间：${item.endTime || ''}<span class="status_txt fright">${statusTxt}</span></div>
+                <div class="type_status" style="display:none"><span>${typeStatusText}</span></div>
+            </div>`
+        });
+        $('.workPlanCon .workPlanList').html(htm);
+        listRigMenuEvent();
+    }
+    /**
+     * 高级筛选事件
+     */
+    let filterEvent = (obj) => {
+        let mySelf = $('.workPlan_me').hasClass('on') ? true : undefined
+        $('.filter-reset-box').off().on('click', function (e) { //重置
+            if (!$(this).hasClass('disable')) {
+                resetFilterEvent(this);
+            }
+        });
+        $(obj).next().find('.filter-status-small>li').off().on('click', function (e) {
+            // let thisActive = false
+            // if ($(this).hasClass('active')) {
+            //     thisActive = true;
+            // }
+            // $(this).parents('.filter-status-small').find('li.active').removeClass('active');
+            // if (!thisActive) {
+            //     $(this).addClass('active');
+            // }
+            // 多选
+            if ($(this).hasClass('active')) {
+                $(this).removeClass('active')
+            } else {
+                $(this).addClass('active')
+            }
+            findPlanList(mySelf,'search');
+        });
+        //输入框回车搜索事件
+        $(obj).next().find('.filterSearchVal').off('keydown').on('keydown', function (event) {
+            if (event.keyCode == "13") {
+                findPlanList(mySelf,'search');
+            }
+        });
+        //输入框搜索按钮事件
+        $(obj).next().find('.searchIcon').off('click').on('click', function (event) {
+            findPlanList(mySelf,'search');
+        });
+    }
+    /**
+     * 重置
+     */
+    let resetFilterEvent = (obj) => {
+        let mySelf = $('.workPlan_me').hasClass('on') ? true : undefined
+        let filterBox = $('#workPlanContainer').find('.workPlanFiltersTermBox')
+        $(obj).removeClass('usable').addClass('disable').removeAttr('onclick');
+        filterBox.find('.filterSearchVal').val('');
+        filterBox.find('.filter-status-small>li').addClass('active');
+        filterBox.find('.filter-status-small>li[value="5"]').removeClass('active');
+        findPlanList(mySelf);
+    }
+    /**
+     * 检查筛选条件个数 更新重置筛选
+     */
+    let checkFilter = () => {
+        let filterBox = $('#workPlanContainer').find('.workPlanFiltersTermBox')
+        let filterCount = 0
+        //==== 搜索框=====
+        if (filterBox.find('.filterSearchVal').val() != '') {
+            filterCount++;
+        }
+        let keyword = filterBox.find('.filterSearchVal').val() || '';
+        // =====状态====
+        let statusList = [];
+        let midStatusDom = filterBox.find('.filter-status-small>li.active');
+        // '全部' 不计入统计
+        if (midStatusDom.length > 0 && midStatusDom.val() != 0) {
+            filterCount++;
+        }
+        midStatusDom.each(function (i, item) {
+            let code = $(this).val()
+            statusList.push(code);
+        });
+        // if (statusList.length == 0) {
+        //     statusList = 0;
+        // }
+        if (filterCount > 0) {
+            filterBox.find('.filter-reset-box').removeClass('disable').addClass('usable');
+        } else {
+            filterBox.find('.filter-reset-box').addClass('disable').removeClass('usable');
+        }
+        return {
+            keyword: keyword,
+            status: statusList,
+        }
+    }
+    /**
+     * 列表菜单按钮代码
+     * menuType:1-只返回单项菜单li(例如：列表中更多按钮点击),0或不传则是右键菜单，返回代码包含ul
+     */
+    let listRigMenuCode = (info) => {
+        let delBtn = ``;
+        // 不是自己创建的、没有删除权限的不能操作；status:2审核中
+        if (info.editAuth || info.status == 2) {
+            delBtn = `<li class="optBtnItem" onclick="WorkPlan.menuOptHandle('删除',this)">删除</li>`;
+        }
+        // 设置可编辑人员:创建人和责任人有此按钮权限
+        let editMemberBtn='';
+        if((info.liableId == loginUserId || info.createUser == loginUserId)){
+            editMemberBtn=`<li class="optBtnItem editMemberItem" onclick="WorkPlan.menuOptHandle('编辑权限',this)">
+            <span class="optBtnTxtBox">
+                <span class="">编辑权限</span>
+                <div class="flex hor_end ver_center">
+                    <div class="memberHeads"></div>
+                    <i class="img_icon greater_icon"></i>
+                </div>
+            </span>
+            <input type="hidden" id="addMemberList">
+            <input type="hidden" id="hadMemberList">
+            </li>`
+        }
+        // btnType：1-列表中更多按钮点击
+        let subMenuClass='myRightMenuSub'
+        if(info.menuType==1){
+            subMenuClass=''
+        }
+        // 共享按钮
+        let shareBtn = `<li class="optBtnItem incChildItem" >
+            <span class="optBtnTxtBox">
+                <span class="">共享</span>
+                <i class="img_icon greater_icon"></i>
+            </span>
+            <ul class="optBtnMenuSub ${subMenuClass}">
+                <li class="optBtnItem" onclick="WorkPlan.menuOptHandle('共享到人',this)">共享到人
+                <input type="hidden" id="addMemberList">
+                <input type="hidden" id="hadMemberList"></li>
+                <li class="optBtnItem" onclick="WorkPlan.menuOptHandle('共享到项目组',this)">共享到项目组</li>
+            </ul>
+        </li>`;
+        // 私密计划不可共享
+        if(info.property==1){
+            shareBtn=''
+        }
+        let liHtm=`${editMemberBtn}${shareBtn}${delBtn}`
+        let htm =''
+        if(info.menuType==1){
+            htm=liHtm
+        }else{
+            htm = `<ul class="optBtnMenu myRightMenu planListRightMenu" id="myRightMenu">${liHtm}</ul>`
+        }
+        return htm;
+    }
+    /**
+     * 列表右键事件
+     */
+    let listRigMenuEvent = (fromType) => {
+        let itemDoms = $('.workPlanCon .workPlanList .workPlanItem').not('.edit_dis');
+        itemDoms.off('contextmenu').on('contextmenu', function (e) {
+            event.stopPropagation();
+            let itemArea=$(this);
+            let menuObj = JSON.parse(itemArea.attr('data-menuobj')||{});
+            showMenuBtn({
+                menuObj:menuObj,
+                itemArea:itemArea,
+                fromType:fromType
+            });
+            
+        });
+        // 列表上菜单显示按钮点击事件
+        itemDoms.find('.opt_btn_out').off('click').on('click', function (e) {
+            let itemArea=$(this).parents('.workPlanItem')
+            let menuObj = JSON.parse(itemArea.attr('data-menuobj')||{});
+            event.stopPropagation();
+            if ($(this).find('.more_btn_box').is(':hidden')) {
+                $(this).find('.more_btn_box').show();
+                showMenuBtn({
+                    menuObj:menuObj,
+                    itemArea:itemArea, 
+                    menuBox:$(this),//菜单外容器
+                    showClass:'.more_btn_box',//添加菜单到此类名节点中
+                    fromType:fromType,
+                    menuType:1 //1-只返回单项菜单li,0或不传则是右键菜单，返回代码包含ul
+                });
+                
+            } else {
+                $(this).find('.more_btn_box').hide();
+            }
+            // ===子菜单移入移出事件===//
+            let subMenuItem = $(this).find('.optBtnMenu .optBtnItem.incChildItem');
+            MyCommon.subMenuEvent({
+                subMenuNode:subMenuItem,
+            });
+            MyCommon.blankClick({
+                bindDom: $('body'),
+                targetDom: $(this),
+                showDom: $(this).find('.more_btn_box'),
+            });
+            
+        });
+    }
+
+    /**
+     * 填充菜单按钮
+     */
+    let showMenuBtn=(paramObj)=>{
+        let itemObj=paramObj.itemObj;
+        let menuObj=paramObj.menuObj;
+        let status = menuObj.status;
+        let planId = menuObj.planId;
+        let planName = menuObj.planName;
+        let liableId = menuObj.liableId;
+        let createUser = menuObj.createUser;
+        let typeId = menuObj.typeId;
+        let teamId = menuObj.teamId;
+        let property = menuObj.property;
+        let param = { status: status, planId: planId, planName: planName, 
+            liableId: liableId, 
+            createUser: createUser,
+            typeId:typeId,
+            teamId:teamId,
+            property:property
+        }
+        let editAuth=false;
+        // 编辑权限选项绑定允许编辑人员数据
+        let memberList=WorkPlanEdit.findEditMember(param);
+        // 数组去重
+        let uniqueList= MyCommon.objArrUnique(memberList,'id');
+        // 编辑权限选项绑定允许编辑人员数据
+        // 查询允许编辑人员
+        $(uniqueList).each(function(i,item){
+            if(item.id==loginUserId){
+                editAuth = true;
+                return false;
+            }
+        });
+        if(!editAuth){
+            return;
+        }
+        param.editAuth=editAuth;
+        let memberHeadBox
+        if(paramObj.menuType==1){//更多按钮
+            param.menuType=1;
+            let content = listRigMenuCode(param);
+            paramObj.menuBox.find(paramObj.showClass).html(content);
+            memberHeadBox=paramObj.menuBox.find('.editMemberItem').find('.memberHeads');
+            // 菜单所需数据
+            paramObj.menuBox.find(".optBtnMenu").data('menuobj', param);
+            // 当前计划数据
+            paramObj.menuBox.find(".optBtnMenu").data('itemobj', itemObj);
+            paramObj.menuBox.find(".optBtnMenu").find('.editMemberItem').data('memberList',uniqueList);
+        }else{
+            let boxDom = $('#workPlanRightCon').find('.workPlanCon');
+            // 生成位置相对的父元素
+            let posDom = boxDom;
+            // 查询允许编辑人员
+            let content = listRigMenuCode(param);
+            let info = {
+                thisElm: paramObj.itemArea,
+                fromType: paramObj.fromType,
+                boxDom: boxDom,
+                posDom: posDom,
+                menuName: '#myRightMenu',
+                content: content,
+                skewX: 272, //横向最大宽度 用于计算偏移量
+            }
+            MyCommon.rightOptMenuShow(info);
+            memberHeadBox=$("#myRightMenu.optBtnMenu").find('.editMemberItem').find('.memberHeads');
+            // 菜单所需数据
+            $("#myRightMenu.optBtnMenu").data('menuobj', param);
+            // 当前计划数据
+            $("#myRightMenu.optBtnMenu").data('itemobj', itemObj);
+            $("#myRightMenu.optBtnMenu").find('.editMemberItem').data('memberList',uniqueList);
+        }
+
+        // 渲染允许编辑人员
+        showEditMember({
+            itemObj:menuObj,
+            memberList:uniqueList,
+            memberHeadBox:memberHeadBox
+        });
+    }
+
+    /**
+     * 渲染允许编辑人员
+     */
+    let showEditMember=(paramObj)=>{
+        let uniqueList=paramObj.memberList;
+        // 数组去重
+        let showNum=0;
+        let showMore=0
+        if(uniqueList.length>3){
+            showMore=1;
+        }
+        let heads=''
+        $(uniqueList).each(function(i,item){
+            let showName = WorkPlan.cutName(item.name || '', 2, -1) || '';
+            if(showMore){
+                if(showNum==2){
+                    heads+=`<span class="member_head more img_icon"></span>`
+                    showNum++;
+                }else if(showNum<2){
+                    heads+=`<span class="member_head">${showName}</span>`
+                    showNum++;
+                }
+            }else{
+                if(showNum<3){
+                    heads+=`<span class="member_head">${showName}</span>`
+                    showNum++;
+                }
+            }
+        });
+        paramObj.memberHeadBox.html(heads);
+    }
+    /**
+     * 列表导航切换事件
+     */
+    let listNavChange=()=>{
+        $('.workPlanListNav>li').off().on('click',function(e){
+            let type=$(this).attr('data-type');
+            $('.workPlanListNav>li').removeClass('active');
+            $(this).addClass('active');
+            findPlanList(type);
+        });
+    }
+
+    /* 工作报告树形结构-- end*/
+    return {
+        //初始化 type:1 工作规划  2 工作报告 cmyInfo:企业id
+        init: (type, cmyInfo) => {
+            // 更新左侧导航工作计划统计
+            Message.planCount();
+            if (type == 1) {
+                queryTreeData(type);
+                queryPlanMe(); //我的规划
+            } else {
+                queryWorkTreeData('.workstatementOrgTreeList', type, cmyInfo)
+            }
+            sidebarDrag();
+            //绑定回车事件
+            $('.orgMenuSearchInp').bind('keyup', function (e) {
+                if (e.key == 'Enter') {
+                    WorkPlan.orgTreeSearch(this, 1)
+                }
+            });
+            listNavChange();
+        },
+        /**
+         * 查询列表
+         */
+        findPlanList: (mySelf) => {
+            findPlanList(mySelf);
+        },
+        /**
+         * 搜索树菜单：账户
+         */
+        orgTreeSearch: (thisElm, type) => {
+            let keyword = $(thisElm).parents('.org-menu-search').find('.orgMenuSearchInp').val()
+            if (keyword == '') {
+                $('.workPlanOrgTreeList').show()
+                $('.org-menu-search-list').hide()
+                return
+            } else {
+                $('.workPlanOrgTreeList').hide()
+            }
+            let param = {
+                // 'orgid': $('.task-sidebar-info').find('.role-span').attr('data-value'),
+                'onlyUser': 1,
+                'keywords': keyword,
+                'orgIds': allCmyIds,
+                'account': loginAccount
+            }
+             $.ajax({
+                    headers:{loginToken:electron.remote.getGlobal('sharedObject').loginToken},
+                type: 'post',
+                dataType: 'json',
+                contentType: 'application/json',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("system", "oa");
+                },
+                url: loginService + '/organization/user/solr/findAuthUserByEnterprise',
+                data: JSON.stringify(param),
+                success: function (data) {
+                    if (data.returnCode === 0) {
+                        //数据组装，展示
+                        showSearchResult(data.dataList || [])
+                    } else {
+                        toastr["error"](data.returnMessage, "信息提示");
+                    }
+                },
+                error: function (data) {
+                    ErrorToastr.authorityMessage(data)
+                }
+            })
+        },
+        /**
+         * 高级筛选显示
+         */
+        showFilters: (thisElm) => {
+            $(thisElm).next().toggle();
+            filterEvent(thisElm);
+            MyCommon.blankClick({
+                bindDom: $('body'),
+                targetDom: $('#workPlanContainer').find('.plan_fliter'),
+                showDom: $('#workPlanRightCon').find('.workPlanPageHeader .workPlanFiltersTermBox'),
+            });
+        },
+
+        /**
+         * 点击空白处隐藏
+         * flag: 0点击筛选 1点击右侧侧边栏标签
+         * targetDom:目标区域 点击不触发隐藏
+         * showDom：此次点击显示的节点
+         * otherBlank:其他需要排除的空白区域节点
+         * showExclude:隐藏上次显示的节点时，需要排除的节点区域
+         */
+        blankClick: (paramObj) => {
+            let bindDom = paramObj.bindDom;
+            let targetDom = paramObj.targetDom;
+            let showDom = paramObj.showDom;
+            let showExclude = paramObj.showExclude;
+            let otherBlank = paramObj.otherBlank;
+            let isHide = true;
+            // 上次和本次点击是同一区域或者是需要排除的区域，则不隐藏
+            if (blankShowDom) {
+                if (targetDom.is(blankShowDom) || targetDom.has(blankShowDom).length > 0) {
+                    isHide = false;
+                }
+                if (showExclude) {
+                    if (showExclude.is(blankShowDom) || showExclude.has(blankShowDom).length > 0) {
+                        isHide = false;
+                    }
+                }
+                if (isHide) {
+                    if ($('#workPlanRigSider').find('.rightCon').is(blankShowDom)) {
+                        blankShowDom.addClass('hide_animate');
+                    } else {
+                        blankShowDom.hide();
+                    }
+                }
+            }
+            blankShowDom = showDom;
+            bindDom.off('click').on('click', function (e) {
+                let _con = targetDom; // 设置目标区域
+                let blankHide = false;
+                // 点击是否是当前节点或区域内节点
+                if (!_con.is(e.target) && _con.has(e.target).length === 0) {
+                    // 其他需要排除的节点：点击不隐藏
+                    if (otherBlank) {
+                        if (!otherBlank.is(e.target) && otherBlank.has(e.target).length === 0) {
+                            blankHide = true;
+                        }
+                    } else {
+                        blankHide = true;
+                    }
+                }
+
+                if (blankHide) {
+                    // ====绑定同一节点点击后需要隐藏的所有相关节点==//
+                    if ($('#workPlanRigSider').find('.rightCon').is(showDom)) {
+                        showDom.addClass('hide_animate');
+                    } else {
+                        showDom.hide();
+                    }
+                    blankShowDom = null;
+                    bindDom.off('click');
+                }
+            });
+        },
+        /**
+         * 菜单按钮操作处理
+         */
+        menuOptHandle: (optType, thisElm) => {
+            $('#myRightMenu').hide();
+            let menuData = $(thisElm).parents('.optBtnMenu').data('menuobj');
+            // let itemObj=$(thisElm).parents('.optBtnMenu').data('itemobj')||[]
+            let planId = menuData.planId;
+            let typeId = menuData.typeId;
+            let planName = menuData.planName;
+            let teamId=menuData.teamId
+            if (optType == '共享到项目组') {
+                WorkPlanEdit.findShareObj({
+                    nodeId: planId,
+                    name: planName,
+                    type: 1,
+                    typeId:typeId,
+                    teamId:teamId
+                });
+            } else if (optType == '共享到人') {
+                WorkPlanEdit.findShareObj({
+                    thisElm: $(thisElm),//选人插件数据缓存的父级节点
+                    nodeId: planId,
+                    name: planName,
+                    type: 0,
+                });
+            } else if (optType == '删除') {
+                WorkPlanEdit.delPlanShow(2, planId, planName,typeId)
+            }else if (optType == '编辑权限') {
+                // 可编辑成员
+                let getMembers=$(thisElm).data('memberList')||[]
+                let memberList=[]
+                // 其他可编辑成员
+                $(getMembers).each(function(i,item){
+                    if(item.id!=menuData.liableId&&item.id!=menuData.createUser){
+                        memberList.push({
+                            userId:item.id,
+                            username:item.name,
+                            account:item.account,
+                        }); 
+                    }else{
+                        // 责任人或创建人不可删除
+                        memberList.push({
+                            userId:item.id,
+                            username:item.name,
+                            account:item.account,
+                            disable:true
+                        });
+                    }
+                });
+                let paramObj = $.extend({}, menuData,{
+                    node:$(thisElm),
+                    teamId:teamId,
+                    memberList:memberList
+                });
+                WorkPlanEdit.chooseEditMember(paramObj);
+            }
+        },
+        /**
+         * 列表点击进入计划脑图页面
+         * planId:点击的计划id
+         * tabHtm：添加的标签html代码
+         * menuObj:计划操作菜单数据集合
+         */
+        listDetailShow: (planId, typeId,findType, thisElm) => {
+            let liableId = $(thisElm).attr('data-liableid') || '';
+            let createUser = $(thisElm).attr('data-createUser') || '';
+            WorkPlan.pageShow(findType, { planId: planId,typeId:typeId, liableId: liableId, createUser: createUser, 
+                nodeElm: $(thisElm)
+            });
+            $('#workPlanSubPageCon').find('.back_btn_box>.tit_name').show();
+            if ($(thisElm).find('.plan_red_dot').length > 0 && $(thisElm).find('.plan_red_dot').is(':visible')) {
+                WorkPlanHandle.readHandle({
+                    optElm: $(thisElm),
+                    type: 2,
+                    id: planId
+                });
+            }
+            // 更新左侧导航工作计划统计
+            Message.planCount();
+        },
+        /**
+         * 进入计划脑图页面
+         * planId:点击的计划id
+         * tabHtm：添加的标签html代码
+         * infoObj:附加参数
+         */
+        pageShow: (fromMsg, infoObj) => {
+            infoObj=infoObj?infoObj:{}
+            let curName = WorkPlan.getParam().curName;
+            let mySelf = $('.workPlan_me').hasClass('on') //是否是我的规划
+            $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-teamid', '');
+            $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-teamname', '');
+            $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-myself', '');
+            // 缓存责任人 创建人
+            $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-liableId', infoObj.liableId||'');
+            $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-createUser', infoObj.createUser||'');
+            if(mySelf){
+                $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-teamid', $(infoObj.nodeElm).attr('data-teamid'));
+                $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-teamname', $(infoObj.nodeElm).attr('data-teamname'));
+                $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-myself', 'true');
+                curName = $(infoObj.nodeElm).attr('data-teamname')
+            }
+            $('#workPlanSubPageCon').find('.tit_name').html(`${curName}-计划列表`);
+            // $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-pagetype', fromMsg || '');
+            // 头部标签渲染
+            planTabShow(fromMsg, infoObj);
+            $('.add_plan_left_btn').show()
+            // 创建计划后跳转到脑图
+            if (fromMsg == 'create') {
+                OKRmindMap.addproject();
+            } else {
+                if(fromMsg == 'share'){ //共享添加mindid
+                    $('.add_plan_left_btn').hide()
+                    $('.planTabItem.active').attr('data-mainId',infoObj.mainId)
+                    $('.workPlanMindMapBox').attr('data-teamid',infoObj.teamId)
+                }
+                // 跳转到脑图
+                pageShowMindMap({
+                    planId:infoObj.planId,
+                    typeId:infoObj.typeId,
+                });
+            }
+        },
+        /**
+         * 编辑权限人员处理
+         */
+        editAuthMemberSet:(infoObj)=>{
+            if (infoObj.liableId != loginUserId && infoObj.createUser != loginUserId) {
+                $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-pagetype', 'other');
+                // $('#workPlanSubPageCon').find('.planTabBox .planTabItem.active').attr('data-pagetype', 'other');
+            }
+            // 编辑权限选项绑定允许编辑人员数据
+            let memberAuth=WorkPlanEdit.checkMemberAuth({
+                planId:infoObj.planId
+            });
+            if(memberAuth){
+                $('#workPlanSubPageCon').find('.workPlanMindMapBox').attr('data-pagetype','editMember');
+                // $('#workPlanSubPageCon').find('.planTabBox .planTabItem.active').attr('data-pagetype', 'editMember');
+            }
+        },
+        /**
+         * 计划脑图上标签切换事件绑定
+         */
+        tabChange: () => {
+            tabChange();
+        },
+        /**
+         * 跳转到脑图
+         */
+        pageShowMindMap: (paramObj) => {
+            pageShowMindMap(paramObj);
+        },
+        /**
+         * 返回计划列表主页
+         */
+        backMainPage: () => {
+            $('#workPlanSubPageCon').hide();
+            let mySelf = $('.workPlan_me').hasClass('on') ? true : undefined
+            findPlanList(mySelf);
+        },
+        /**
+         * 添加计划
+         */
+        addPlan: () => {
+            $('#workPlanSubPageCon').find('.planTabBox .planTabItem').removeClass('active');
+            if ($('#workPlanSubPageCon').find('.planTabBox .planTabItem').length >= 5) {
+                $('#workPlanSubPageCon').find('.planTabBox .planTabItem:last-of-type').remove();
+            }
+            OKRmindMap.addproject('tab')
+        },
+        /**
+         * 获取组织架构数据
+         */
+        getParam: (nodeId) => {
+            let getNodeId = electron.remote.getGlobal('workplan').nodeId;
+            if (nodeId) {
+                getNodeId = nodeId;
+            }
+            let info = TaskTable.getParam(getNodeId);
+            return info;
+        },
+        getTreeChildData: (node, type) => {
+            return getTreeChildData(node, type)
+        },
+        /*初始化 type:1 工作规划  2 工作报告 cmyInfo:企业id*/
+        cmyTreeListShow: (type) => {
+            cmyTreeListShow(type)
+        },
+        /**
+         * 刷新当前脑图头部标签
+         */
+        refreshCurTab: (infoObj) => {
+            let status = infoObj.status || '';
+            let statusTxt = '', statusClass = '';
+            if (status == 4) {
+                statusTxt = '已派发';
+                statusClass = 'yes_disb';
+            } else if (status == 3) {
+                statusTxt = '部分派发';
+                statusClass = 'yes_disb';
+            } else if (status == 2) {
+                statusTxt = '审核中';
+                statusClass = 'review';
+            } else if (status == 5) {
+                statusTxt = '已完成';
+                statusClass = 'finish';
+            } else {
+                statusTxt = '草稿';
+                statusClass = 'no_disb';
+            }
+            let tabIn = `
+            <span class="plan_name">${infoObj.name || ''}</span>
+            <span class="plan_tab_sign ${statusClass}">${statusTxt}</span>
+            <i class="img_icon tab_del_icon"></i>`;
+            $('#workPlanSubPageCon').find('.planTabItem.active').html(tabIn);
+            tabChange();
+        },
+        /**
+         * 名字截取
+         * name：名字字符串
+         * len：截取长度
+         * direction：0从左向右截取 -1右向左
+         */
+        cutName: (name, len, direction) => {
+            let newName = name;
+            if (name.length > len) {
+                if (direction == 0) {
+                    newName = name.slice(0, len);
+                } else {
+                    newName = name.slice(-len);
+                }
+            }
+            return newName;
+        },
+        /**
+         * 无数据提示
+         * @param {*} boxDom 添加图文到节点boxDom
+         */
+        noDataShow: (boxDom) => {
+            let noData = `<div class="noData workPlanListNoData">
+            <img src="../../common/image/index/none_data.png" alt="" class="no_text_img">
+            <div class="text_name none_text_color">当前还没有数据哦~</div>
+            </div>`
+            boxDom.html(noData);
+        },
+        queryChatTreeData: (muid, id) => {
+            projectManageList = [];
+            queryChatTreeData(muid, id)
+        },
+        /**
+         * 填充菜单按钮外部调用
+         */
+        showMenuBtn:(paramObj)=>{
+            showMenuBtn(paramObj);
+        }
+    }
+}()
+</script>
+
+</html>

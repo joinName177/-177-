@@ -1,0 +1,111 @@
+/*!
+    create by czq
+    version:1.0.0 sass网页中的各种实践
+*/
+body {
+    margin: 0;
+    padding: 0;
+}
+$highlight-color: #eaf0f7;
+$highlight-border: 1px solid $highlight-color;
+$g-padding: 10px;
+$flex: flex;
+$align: center;
+section {
+    border: $highlight-border;
+    background-color: #f9f8f8;
+    margin: {
+        bottom: 20px;
+    }
+}
+section .tips {
+    border-bottom: 1px solid #03a9f4;
+    color: #a5a5a5;
+    padding: 5px 0 5px 10px;
+}
+section .warp {
+    display: $flex;
+    padding: $g-padding;
+}
+$side: right;
+section .warp div {
+    margin-#{$side}: 5px;
+}
+$item-height: 80px;
+.item {
+    width: 100px;
+    height: $item-height;
+    cursor: pointer;
+
+    transition-duration: 0.4s;
+    line-height: $item-height;
+    text-align: $align;
+    border: {
+        radius: 5px;
+        left: 2px solid {
+            color: #ffcc99;
+        }
+        top: 2px solid {
+            color: #ccff99;
+        }
+        right: 2px solid {
+            color: #ffcc99;
+        }
+        bottom: 5px solid $highlight-color {
+            color: white;
+        }
+    }
+}
+
+.item {
+    &:hover {
+        color: white;
+        background-color: #9e9e9e70;
+        border: {
+            bottom: {
+                color: #99ccff;
+            }
+        }
+    }
+}
+
+//继承 @extend
+.box1 {
+    width: 200px;
+    height: 50px;
+    background-color: #e8e7e7;
+    box-shadow: 0 0 2px black;
+    text-align: $align;
+    line-height: 50px;
+}
+
+.box2 {
+    @extend .box1;
+    font-size: 100%;
+}
+
+//1@mixin命令，定义一个可重用代码块  2常用颜色代码
+@mixin rounded-corners($color: red, $bgcolor: red) {
+    border: $highlight-border;
+    padding: $g-padding;
+    color: $color;
+    background-color: $bgcolor;
+}
+
+.box3 {
+    //lighten(#cc3, 10%) // #d6d65c
+    @include rounded-corners(black, lighten(#cc3, 10%));
+}
+
+.box4 {
+    //darken(#cc3, 10%) // #a3a329
+    @include rounded-corners(blue, darken(#cc3, 10%));
+}
+.box5 {
+    //grayscale(#cc3) // #808080
+    @include rounded-corners(black, grayscale(#cc3));
+}
+.box6 {
+    //complement(#cc3) // #33c
+    @include rounded-corners(blue, complement(#cc3));
+}
