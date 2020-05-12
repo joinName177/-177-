@@ -1,0 +1,40 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style: none;
+}
+
+$flex: flex;
+.container {
+  display: $flex;
+  height: 100%;
+}
+.wrap-l {
+  width: 160px;
+}
+.wrap-r {
+  width: calc(100% - 160px);
+}
+$lh: 42px;
+$Calign: center;
+.l_list li {
+  height: $lh;
+  line-height: $lh;
+  background: #272c33;
+  margin: {
+    bottom: 1px;
+  }
+  text-align: $Calign;
+  color: #c8c9ce ;
+  cursor: pointer;
+  transition: {
+    duration: 0.4s;
+  }
+}
+.l_list li {
+  &:hover {
+    color: white;
+  }
+}

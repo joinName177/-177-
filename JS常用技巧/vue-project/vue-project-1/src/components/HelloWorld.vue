@@ -1,58 +1,29 @@
 <template>
-  <div class="hello">
-     <div>
-      <span v-for="(value, key) in language">{{value}}</span>
+  <div class="container">
+    <div class="wrap-l">
+      <ul class="l_list">
+        <li v-for="item in navArr">{{item.title}}<i class="fa {{item.icon}}" aria-hidden="true"></i></li>
+      </ul>
     </div>
-    <ul>
-      <li v-for="item in country">{{item}}</li>
-    </ul>
-   <div>
-     <button @click="changeLanguage">按钮</button>
-   </div>
+    <div class="wrap-r">2</div>
   </div>
 </template>
-
 <script>
 export default {
-  name: "HelloWorld",
+  name: "#example-1",
   data() {
     return {
-      country: ["中国", "美国", "法国", "德国", "韩国", "意大利", "西班牙"],
-      language: {
-        zh: "中文",
-        ch: "英文"
-      }
+      navArr: [
+        {title:"导航栏",icon:'fa-envelope-open'},
+        {title:"导航栏",icon:'fa-university'},
+        {title:"导航栏",icon:'fa-calendar-check-o'},
+        {title:"导航栏",icon:'fa-credit-card-alt'},
+      ]
     };
-  },
-  methods: {
-    changeLanguage(){
-      this.language.zh = '中国-中文'
-    }
   }
 };
 </script>
-
 <!--STYLE-->
-<style scoped>
-ul {
-  width: 300px;
-  margin: 0;
-  padding: 0;
-}
-li {
-  list-style: none;
-  height: 28px;
-  border: 1px solid #d8d8d8;
-  border-bottom: none;
-  padding-left: 5px;
-  line-height: 28px;
-  cursor: pointer;
-}
-li:last-child {
-  border-bottom: 1px solid #d8d8d8;
-}
-li:hover {
-  background: #d8d8d8;
-  color: azure;
-}
+<style scoped lang='scss'>
+@import "helloWorld.scss";
 </style>

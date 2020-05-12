@@ -35,23 +35,6 @@ react-devtools超级简单安装教程
 
 
 
-  let _width = 0
-        let n = str.match(/\d/g);//数字
-        let e = str.match(/[a-z]/ig);//字母
-        let c = str.match(/[^ -~]/g);//中文
-        let mcomma = str.match(/\$|#|,|，|-/g) || []
-        let decimal = str.match(/\.| |!|`|'|\|/g) || []
-        let rline = str.match(/\*|{|}|_|\/|\\|\?/g) || []
-        let semicolon = str.match(/\:|;/g) || []
-        let doubleNum = str.match(/\"/g) || []
-        let addNum = str.match(/\+|~|=|<|>|\^/g) || []
-        let brackets = str.match(/\(|\)/g) || []
-        let aitNum = str.match(/\@/g) || []
-        let percent = str.match(/\%/g) || []
-        let atNums = str.match(/\&/g) || []
-
-
-
 
 
 
