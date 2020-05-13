@@ -19,21 +19,23 @@ $flex: flex;
 }
 $lh: 42px;
 $Calign: center;
-.l_list li {
+.wrap-l a {
+  display: $flex;
+  text-decoration: none;
   height: $lh;
-  line-height: $lh;
+  align-items: $Calign;
   background: #272c33;
   margin: {
     bottom: 1px;
   }
   text-align: $Calign;
-  color: #c8c9ce ;
+  color: #c8c9ce;
   cursor: pointer;
   transition: {
     duration: 0.4s;
   }
 }
-.l_list li {
+.wrap-l a {
   &:hover {
     color: white;
   }

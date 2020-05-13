@@ -1,5 +1,5 @@
 <template>
     <div>
-        这是主页面
+        这是Two页面
     </div>
 </template>
