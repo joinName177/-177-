@@ -1,11 +1,12 @@
 /*!
-    create by czq
-    version:1.0.0 sass网页中的各种实践
+    //@===2020/5/21===
 */
 body {
-    margin: 0;
+    margin: (14px/2);
     padding: 0;
 }
+$defaltW: 100px;
+$defaltH: 100px;
 $highlight-color: #eaf0f7;
 $highlight-border: 1px solid $highlight-color;
 $g-padding: 10px;
@@ -16,6 +17,7 @@ section {
     background-color: #f9f8f8;
     margin: {
         bottom: 20px;
+        top: 30px;
     }
 }
 section .tips {
@@ -23,49 +25,50 @@ section .tips {
     color: #a5a5a5;
     padding: 5px 0 5px 10px;
 }
+$item-height: 80px;
 section .warp {
     display: $flex;
     padding: $g-padding;
-}
-$side: right;
-section .warp div {
-    margin-#{$side}: 5px;
-}
-$item-height: 80px;
-.item {
-    width: 100px;
-    height: $item-height;
-    cursor: pointer;
+    .item {
+        width: 100px;
+        height: $item-height;
+        cursor: pointer;
 
-    transition-duration: 0.4s;
-    line-height: $item-height;
-    text-align: $align;
-    border: {
-        radius: 5px;
-        left: 2px solid {
-            color: #ffcc99;
+        transition-duration: 0.4s;
+        line-height: $item-height;
+        text-align: $align;
+        border: {
+            radius: 5px;
+            left: 2px solid {
+                color: #ffcc99;
+            }
+            top: 2px solid {
+                color: #ccff99;
+            }
+            right: 2px solid {
+                color: #ffcc99;
+            }
+            bottom: 5px solid $highlight-color {
+                color: white;
+            }
         }
-        top: 2px solid {
-            color: #ccff99;
-        }
-        right: 2px solid {
-            color: #ffcc99;
-        }
-        bottom: 5px solid $highlight-color {
+        &:hover {
             color: white;
+            background-color: #9e9e9e70;
+            border: {
+                //嵌套写法
+                bottom: {
+                    color: #99ccff;
+                }
+            }
         }
     }
 }
-
-.item {
-    &:hover {
-        color: white;
-        background-color: #9e9e9e70;
-        border: {
-            bottom: {
-                color: #99ccff;
-            }
-        }
+$side: right;
+section .warp {
+    position: relative;
+    div {
+        margin-#{$side}: 5px; //如果变量需要镶嵌在字符串之中，就必须需要写在#{}之中。
     }
 }
 
@@ -109,3 +112,32 @@ $item-height: 80px;
     //complement(#cc3) // #33c
     @include rounded-corners(blue, complement(#cc3));
 }
+
+$type: 1;
+.box7 {
+    width: $defaltW;
+    height: $defaltH;
+    border: $highlight-border;
+    @if $type == 1 {
+        color: blue;
+    } @else if $type == 2 {
+        color: red;
+    } @else {
+        color: black;
+    }
+}
+
+@for $i from 1 through 4 {
+    .item-#{$i} {
+        width: (20px * $i);
+    }
+}
+
+
+// @function double($n) {
+// 　　　@return $n * 2;
+// }
+    
+// .item-5 {
+// 　　　width: double(5px);
+// }

@@ -7,11 +7,14 @@ import 'font-awesome/css/font-awesome.css'
 Vue.config.productionTip = false
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+//vuex
+import store from '../src/store'
 Vue.use(ElementUI);
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>'
 })

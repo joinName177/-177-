@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./jquery-2.1.4.js"></script>
+    <style>
+        html,
+        body,
+        ul,
+        li {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            vertical-align: baseline;
+        }
+
+        body,
+        html {
+            line-height: 1;
+            font-family: "Microsoft YaHei", Arial, Helvetica, sans-serif;
+            font-size: 16px;
+            color: #333;
+        }
+
+        ol,
+        ul {
+            list-style: none;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        body {
+            background: #f2f2f2;
+        }
+
+        .prolist li {
+            height: 50px;
+            line-height: 50px;
+            border-bottom: 1px solid #f8f8f8;
+            background: #fff;
+            padding: 0 15px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .prolist li a {
+            color: #333;
+            font-size: 16px;
+        }
+
+        /**加载效果旋转**/
+        @-webkit-keyframes rotate {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes rotate {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+                transform: rotate(360deg);
+            }
+        }
+
+        .loadmore {
+            display: block;
+            line-height: 50px;
+            text-align: center;
+            color: #ccc;
+            font-size: 14px;
+        }
+
+        .loadmore span {
+            height: 20px;
+            width: 20px;
+            border-radius: 100%;
+            display: inline-block;
+            margin: 10px;
+            border: 2px solid #f60;
+            border-bottom-color: transparent;
+            vertical-align: middle;
+            -webkit-animation: rotate 1.1s infinite linear;
+            animation: rotate 1.1s infinite linear;
+        }
+
+        .loadover {
+            position: relative;
+            margin: 0 12px;
+            padding: 24px 0;
+            height: 20px;
+            line-height: 20px;
+            color: #909090;
+            text-align: center;
+        }
+
+        .loadover span {
+            position: relative;
+            display: inline-block;
+            padding: 0 6px;
+            height: 20px;
+            background: #F2F2F2;
+            z-index: 2
+        }
+        
+    </style>
+</head>
+
+<body>
+    <ul class="prolist">
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+        <li><a href="">好经典人生语句，经典得让人心痛！</a></li>
+    </ul>
+</body>
+<script>
+    var page=1;
+    var finished=0;
+    var sover=0;
+
+    //如果屏幕未到整屏自动加载下一页补满
+    var setdefult=setInterval(function (){
+        if(sover==1)
+            clearInterval(setdefult);
+        else if($(".prolist").height()<$(window).height())
+            loadmore($(window));
+        else
+            clearInterval(setdefult);
+    },500);
+
+    //加载完
+    function loadover(){
+        if(sover==1)
+        {
+            var overtext="Duang～到底了";
+            $(".loadmore").remove();
+            if($(".loadover").length>0)
+            {
+                $(".loadover span").eq(0).html(overtext);
+            }
+            else
+            {
+                var txt='<div class="loadover"><span>'+overtext+'</span></div>'
+                $("body").append(txt);
+            }
+        }
+    }
+
+    //加载更多
+    var vid=0;
+    function loadmore(obj){
+        if(finished==0 && sover==0)
+        {
+            var scrollTop = $(obj).scrollTop();
+            var scrollHeight = $(document).height();
+            var windowHeight = $(obj).height();
+
+            if($(".loadmore").length==0)
+            {
+                var txt='<div class="loadmore"><span class="loading"></span>加载中..</div>'
+                $("body").append(txt);
+            }
+
+            if (scrollTop + windowHeight -scrollHeight<=50 ) {
+                //此处是滚动条到底部时候触发的事件，在这里写要加载的数据，或者是拉动滚动条的操作
+
+
+                //防止未加载完再次执行
+                finished=1;
+
+                var result = "";
+                for(var i = 0; i < 6; i++){
+                    vid++;
+                    result+='<li>'
+                    +'<a href="">好经典人生语句，经典得让人心痛！'+parseInt(vid)+'</a>'
+                    +'</li>'
+                }
+                setTimeout(function(){
+                    //$(".loadmore").remove();
+                    $('.prolist').append(result);
+                    page+=1;
+                    finished=0;
+                    //最后一页
+                    if(page==10)
+                    {
+                        sover=1;
+                        loadover();
+                    }
+                },1000);
+                /*$.ajax({
+                 type: 'GET',
+                 url: 'json/more.json?t=25&page='+page,
+                 dataType: 'json',
+                 success: function(data){
+                 if(data=="")
+                 {
+                 sover = 1;
+                 loadover();
+                 if (page == 1) {
+                 $("#no_msg").removeClass("hidden");
+                 $(".loadover").remove();
+                 }
+                 }
+                 else
+                 {
+                 var result = ''
+                 for(var i = 0; i < data.lists.length; i++){
+                 result+='<li>'
+                 +'<a href="'+data.lists[i].link+'">'+data.lists[i].title+parseInt(page+1)+"-"+i+'</a>'
+                 +'</li>'
+                 }
+
+                 // 为了测试，延迟1秒加载
+                 setTimeout(function(){
+                 $(".loadmore").remove();
+                 $('.prolist').append(result);
+                 page+=1;
+                 finished=0;
+                 //最后一页
+                 if(page==10)
+                 {
+                 sover=1;
+                 loadover();
+                 }
+                 },1000);
+                 }
+                 },
+                 error: function(xhr, type){
+                 alert('Ajax error!');
+                 }
+                 });*/
+            }
+        }
+    }
+    //页面滚动执行事件
+    $(window).scroll(function (){
+        loadmore($(this));
+    });
+</script>
+</html>
