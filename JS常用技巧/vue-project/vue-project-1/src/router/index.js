@@ -6,7 +6,7 @@ import Router from 'vue-router'
 
 const Home = () => import('@/components/HomePage')
 
-const Login = () => import('@/components/Login')
+const MainPage = () => import('@/components/MainPage')
 const NotFound = () => import('@/components/NotFound')
 
 //基础组件
@@ -44,7 +44,7 @@ const Carousel = () => import('@/components/element-demo-other/Carousel')
 //父子传值
 const TransferHome = () => import('@/components/myChild/vue-transfer-data/transferHome')
 
-const MainPage = ()=>import('@/components/mainPage')
+const LoginPage = ()=>import('@/components/loginPage')
 
 Vue.use(Router)
 
@@ -52,8 +52,8 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: '首页',
-      component: MainPage
+      name: '登录',
+      component: LoginPage
      },
     {
       path: '/',
@@ -260,10 +260,10 @@ export default new Router({
       ]
     },
     {
-      path: '/login',
+      path: '/MainPage',
       icon: 'el-icon-s-custom',
-      name: 'Login',
-      component: Login,
+      name: '主页',
+      component: MainPage,
       hidden: true
     },
     {
@@ -279,7 +279,7 @@ export default new Router({
     },
     {
       path:'/TransferHome',
-      name:'VUE传值',
+      name:'父子组件传参',
       component: TransferHome,
     }
   ]
